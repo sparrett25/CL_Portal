@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { UserProvider } from './context/UserContext'; // Import your context
 import { supabase } from './lib/supabase'; // Import supabase instance
 
@@ -25,9 +25,13 @@ function App() {
     <UserProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          {/* 🔁 Redirect root "/" to /login */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
           <Route path="/login" element={<LoginPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route path="/home" element={<HomePage />} />
+
           {/* Add your other routes here */}
         </Routes>
       </Router>
