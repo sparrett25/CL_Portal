@@ -1,8 +1,23 @@
+// vite.config.js
+
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
-  root: './',  // Adjust this to your project's directory where `index.html` resides.
-  build: {
-    outDir: 'dist',  // Output directory for the build
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
   },
+  server: {
+    port: 3000,
+    open: true,
+  },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  },
+  base: '/',
 });
