@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { UserProvider } from './context/UserContext'; // User context
-import { supabase } from './lib/supabase'; // Supabase client
+import { UserProvider } from './context/UserContext';
+import { supabase } from './lib/supabase';
 
-// Page components
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import OnboardingPage from './pages/OnboardingPage';
@@ -23,22 +22,17 @@ function App() {
   }, []);
 
   return (
-    <UserProvider>
-      <Router>
+    <Router>
+      <UserProvider>
         <Routes>
-          {/* Default redirect from "/" to "/login" */}
           <Route path="/" element={<Navigate to="/login" replace />} />
-
-          {/* Your actual pages */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/home" element={<HomePage />} />
-
-          {/* Optional: Wildcard route to catch all */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
-      </Router>
-    </UserProvider>
+      </UserProvider>
+    </Router>
   );
 }
 
