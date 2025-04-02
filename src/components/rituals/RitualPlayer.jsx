@@ -1,0 +1,1 @@
+export default function RitualPlayer() { return <div>🔮 Ritual Player Loaded</div>; }
