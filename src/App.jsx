@@ -26,6 +26,7 @@ function App() {
       <UserProvider>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
+		  <Route path="/" element={<LandingPortal />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/home" element={<HomePage />} />
