@@ -1,4 +1,4 @@
-/* === Fonts (you can load Cinzel or custom in index.html) === */
+/* === Fonts & Base === */
 body {
   margin: 0;
   padding: 0;
@@ -8,39 +8,9 @@ body {
   overflow-x: hidden;
 }
 
-/* === Keyframes: Glowing Sigil Pulse === */
-@keyframes pulseGlow {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 10px #7b5de3;
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 25px #7b5de3, 0 0 50px #7b5de3aa;
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 10px #7b5de3;
-  }
-}
+/* === Tailwind utilities are imported in index.css === */
 
-/* === Fade-in for text or whispers === */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* === Optional: FadePulse animation for loader message === */
-@keyframes fadePulse {
-  0%, 100% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-/* === Global utility === */
+/* === Buttons & Inputs === */
 button {
   font-family: inherit;
   transition: all 0.3s ease;
@@ -52,4 +22,67 @@ button:hover {
 
 input {
   font-family: inherit;
+}
+
+/* === Scrollbar Styling === */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+}
+
+/* === Codex Lumina Animations & Utility Classes === */
+
+/* Fade-in upward */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 1.2s ease-out forwards;
+}
+
+/* Glowing sigil pulse */
+@keyframes sigil-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px #8b5cf6;
+  }
+  50% {
+    box-shadow: 0 0 20px #8b5cf6;
+  }
+}
+
+.animate-sigil {
+  animation: sigil-glow 2s ease-in-out infinite;
+}
+
+/* Text or whisper fade-in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade pulse for subtle loaders or cues */
+@keyframes fadePulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
 }

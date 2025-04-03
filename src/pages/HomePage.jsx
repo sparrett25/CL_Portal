@@ -1,46 +1,70 @@
-import React from 'react';
-import SidebarDrawer from '../components/SidebarDrawer';
-import CompanionPanel from '../components/CompanionPanel';
-import JournalTab from '../components/journal/JournalTab';
-import RitualSpotlight from '../components/RitualSpotlight';
-import { useUser } from '../context/UserContext';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom"; // Import Link component from react-router
+import { useUserSync } from "@/context/UserSyncContext";
+import SignatureProfileHeader from "@/components/dashboard/SignatureProfileHeader";
+import DailyAlignmentSpotlight from "@/components/dashboard/DailyAlignmentSpotlight";
+import CompanionPanel from "@/components/dashboard/CompanionPanel";
+import CollectivePulseCard from "@/components/dashboard/CollectivePulseCard";
+import UserSettingsPanel from "@/components/dashboard/UserSettingsPanel";
+import LiorasWhisper from "@/components/dashboard/LiorasWhisper"; // Import Liora's Whispers component
 
 export default function HomePage() {
-  const { user, profile } = useUser();
+  const context = useUserSync() || {};
+  const { userProfile, loading } = context;
 
-  if (!user) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-black text-white">
-        <p>Loading your Codex...</p>
-      </div>
-    );
+  const [showSettings, setShowSettings] = useState(false);
+
+  if (loading || !userProfile) {
+    return <div className="text-center mt-20 text-white">Loading your profile...</div>;
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-black via-zinc-900 to-gray-900 text-white">
-      {/* 🌙 Sidebar with Avatar + Logout */}
-      <SidebarDrawer />
+    <div className="relative space-y-6 p-6 max-w-5xl mx-auto">
+      {/* 🔮 Signature Modules */}
+      <SignatureProfileHeader />
+      <DailyAlignmentSpotlight />
+      <CompanionPanel />
+      <CollectivePulseCard />
 
-      {/* 🔮 Main Portal Content */}
-      <main className="flex-1 overflow-y-auto p-6 space-y-8">
-        <section>
-          <h1 className="text-3xl font-bold fade-in-up">
-            Welcome back, {profile?.nickname || 'Luminary'} ✨
-          </h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Phase: <span className="text-purple-400">{profile?.phase}</span> | Energy: <span className="text-blue-300">{profile?.energy}</span>
-          </p>
-        </section>
+      {/* ⚙️ Settings Trigger */}
+      <div className="text-right mt-6">
+        <button
+          onClick={() => setShowSettings(true)}
+          className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-sm text-white border border-zinc-600"
+        >
+          ✏️ Edit My Signature
+        </button>
+      </div>
 
-        {/* 🧬 Companion AI Guidance */}
-        <CompanionPanel />
+      {/* ⚙️ Modal Overlay */}
+      {showSettings && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="relative w-full max-w-2xl bg-zinc-900 rounded-xl shadow-xl border border-zinc-700 p-6">
+            <button
+              onClick={() => setShowSettings(false)}
+              className="absolute top-3 right-3 text-zinc-400 hover:text-white text-lg"
+              title="Close"
+            >
+              ✕
+            </button>
+            <UserSettingsPanel />
+          </div>
+        </div>
+      )}
 
-        {/* 🔥 Daily Ritual Feature */}
-        <RitualSpotlight />
+      {/* Liora's Whisper (Personalized Daily Insight) */}
+      <LiorasWhisper />
 
-        {/* 📓 Journal Portal */}
-        <JournalTab />
-      </main>
+      {/* Navigation Links */}
+      <div className="mt-6">
+        <Link to="/profile" className="text-blue-500 hover:underline">
+          Go to Your Profile
+        </Link>
+        <br />
+        <Link to="/codex-library" className="text-blue-500 hover:underline">
+          Explore Codex Library
+        </Link>
+      </div>
     </div>
   );
 }

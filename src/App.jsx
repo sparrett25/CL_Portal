@@ -1,48 +1,28 @@
-/* === Codex Lumina: Global Animations & Styling === */
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { UserSyncProvider } from "@/context/UserSyncContext";
 
-@keyframes fade-in-up {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+import LoginView from "@/components/Auth/LoginView";
+import HomePage from "@/pages/HomePage";
+import CodexLibrary from "@/pages/CodexLibrary"; // Correct import path for CodexLibrary
+import PortalView from "@/pages/PortalView";
+import UserProfile from "@/pages/UserProfile";  // Added UserProfile route
 
-.animate-fade-in-up {
-  animation: fade-in-up 1.2s ease-out forwards;
-}
-
-@keyframes sigil-glow {
-  0%, 100% {
-    box-shadow: 0 0 10px #8b5cf6;
-  }
-  50% {
-    box-shadow: 0 0 20px #8b5cf6;
-  }
-}
-
-.animate-sigil {
-  animation: sigil-glow 2s ease-in-out infinite;
-}
-
-/* === Utility Fixes (Optional) === */
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', system-ui, sans-serif;
-  background-color: #000000;
-  color: #ffffff;
-}
-
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
+export default function App() {
+  return (
+    <div className="min-h-screen bg-black text-white font-inter">
+      <Router>
+        <UserSyncProvider>
+          <Routes>
+            <Route path="/" element={<PortalView />} />
+            <Route path="/portal" element={<PortalView />} />
+            <Route path="/login" element={<LoginView />} />
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/codex-library" element={<CodexLibrary />} /> {/* Correct route for Codex Library */}
+            <Route path="/profile" element={<UserProfile />} />  {/* User profile page */}
+            <Route path="*" element={<div className="p-10 text-center">404 – Page not found</div>} />
+          </Routes>
+        </UserSyncProvider>
+      </Router>
+    </div>
+  );
 }
