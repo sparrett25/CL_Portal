@@ -1,38 +1,50 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { UserProvider } from './context/UserContext';
 import { supabase } from './lib/supabase';
+import { UserProvider } from './context/UserContext';
 
-import HomePage from './pages/HomePage';
+// Pages
+import LandingPortal from './pages/LandingPortal';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import OnboardingPage from './pages/OnboardingPage';
+import HomePage from './pages/HomePage';
+
+// Session-aware redirect wrapper
+import SessionRedirect from './components/auth/SessionRedirect';
 
 function App() {
   useEffect(() => {
-    const fetchSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        console.log('User is logged in:', session);
-      } else {
-        console.log('No active session');
-      }
-    };
-
-    fetchSession();
+    // Console check to confirm session on load
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Session:', session);
+    });
   }, []);
 
   return (
     <Router>
       <UserProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-		  <Route path="/" element={<LandingPortal />} />
+          {/* Root path now smartly decides what to show */}
+          <Route
+            path="/"
+            element={
+              <SessionRedirect>
+                <LandingPortal />
+              </SessionRedirect>
+            }
+          />
+
+          {/* Auth routes */}
           <Route path="/login" element={<LoginPage />} />
-		  <Route path="/signup" element={<SignupPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+
+          {/* Guided flows */}
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/home" element={<HomePage />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+
+          {/* Catch-all fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </UserProvider>
     </Router>
