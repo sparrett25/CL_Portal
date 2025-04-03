@@ -1,54 +1,48 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { supabase } from './lib/supabase';
-import { UserProvider } from './context/UserContext';
+/* === Codex Lumina: Global Animations & Styling === */
 
-// Pages
-import LandingPortal from './pages/LandingPortal';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import OnboardingPage from './pages/OnboardingPage';
-import HomePage from './pages/HomePage';
-
-// Session-aware redirect wrapper
-import SessionRedirect from './components/auth/SessionRedirect';
-
-function App() {
-  useEffect(() => {
-    // Console check to confirm session on load
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Session:', session);
-    });
-  }, []);
-
-  return (
-    <Router>
-      <UserProvider>
-        <Routes>
-          {/* Root path now smartly decides what to show */}
-          <Route
-            path="/"
-            element={
-              <SessionRedirect>
-                <LandingPortal />
-              </SessionRedirect>
-            }
-          />
-
-          {/* Auth routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-
-          {/* Guided flows */}
-          <Route path="/onboarding" element={<OnboardingPage />} />
-          <Route path="/home" element={<HomePage />} />
-
-          {/* Catch-all fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </UserProvider>
-    </Router>
-  );
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-export default App;
+.animate-fade-in-up {
+  animation: fade-in-up 1.2s ease-out forwards;
+}
+
+@keyframes sigil-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px #8b5cf6;
+  }
+  50% {
+    box-shadow: 0 0 20px #8b5cf6;
+  }
+}
+
+.animate-sigil {
+  animation: sigil-glow 2s ease-in-out infinite;
+}
+
+/* === Utility Fixes (Optional) === */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #000000;
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+}
