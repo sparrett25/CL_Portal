@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useUserSync } from "@/context/UserSyncContext";
 import { getAllJournalEntries } from "@/services/journalService";
-// Page Components
+// Page Componentsv
 export default function Reflections() {
   const { user } = useUserSync();
   const [entries, setEntries] = useState([]);

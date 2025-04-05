@@ -28,7 +28,7 @@ export default function App() {
           <Route path="/home" element={user ? <HomePage /> : <Navigate to="/login" />} />
           <Route path="/library" element={user ? <CodexLibrary /> : <Navigate to="/login" />} />
           <Route path="/profile" element={user ? <UserProfile /> : <Navigate to="/login" />} />
-          <Route path="/reflections" element={user ? <Reflections /> : <Navigate to="/login" />} />
+         <Route path="/reflections" element={user ? <Reflections /> : <Navigate to="/login" />} />// 🆕 New page
           <Route path="*" element={<div className="p-10 text-center">404 – Page not found</div>} />
         </Routes>
       </Router>
