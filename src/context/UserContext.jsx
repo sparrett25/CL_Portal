@@ -1,80 +1,31 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useNavigate } from 'react-router-dom';
+import { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
-export const UserContext = createContext();
+const UserSyncContext = createContext();
 
-export const UserProvider = ({ children }) => {
+export function UserSyncProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
+    const session = supabase.auth.session();
+    setUser(session ? session.user : null);
 
-      if (error) {
-        console.error('Error getting session:', error);
-        setIsLoading(false);
-        return;
-      }
-
-      const currentUser = session?.user;
-      setUser(currentUser);
-
-      if (currentUser) {
-        const { data: profile, error: profileError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-
-        if (profileError) {
-          console.warn('User profile not found or error loading profile:', profileError.message);
-        }
-
-        setUserProfile(profile || null);
-      }
-
-      setIsLoading(false);
-    };
-
-    fetchUser();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
+    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session ? session.user : null);
     });
 
     return () => {
-      subscription.unsubscribe();
+      authListener.unsubscribe();
     };
   }, []);
 
-  const resetUserJourney = () => {
-    setUserProfile(null);
-    setUser(null);
-    navigate('/login');
-  };
-
   return (
-    <UserContext.Provider
-      value={{
-        user,
-        userProfile,
-        setUserProfile,
-        isLoading,
-        resetUserJourney,
-      }}
-    >
+    <UserSyncContext.Provider value={{ user }}>
       {children}
-    </UserContext.Provider>
+    </UserSyncContext.Provider>
   );
-};
+}
 
-export const useUserContext = () => useContext(UserContext);
+export function useUser() {
+  return useContext(UserSyncContext);
+}

@@ -1,0 +1,67 @@
+{
+  "core_teachings": {
+    "description": "A collection of essential teachings that form the foundation of the Codex Lumina.",
+    "categories": [
+      {
+        "title": "Energy Alignment",
+        "slug": "energy-alignment",
+        "description": "Exploring the three core energies: Light, Neutral, and Dark.",
+        "content": [
+          "energy-alignment-light.md",
+          "energy-alignment-neutral.md",
+          "energy-alignment-dark.md"
+        ]
+      },
+      {
+        "title": "The Trinity of Energy",
+        "slug": "trinity-of-energy",
+        "description": "The core structure of the universe and human consciousness.",
+        "content": [
+          "trinity-of-energy.md"
+        ]
+      }
+    ]
+  },
+  "reflections": {
+    "description": "Deep, introspective pieces that offer wisdom and insights for those on their spiritual journey.",
+    "categories": [
+      {
+        "title": "Personal Growth",
+        "slug": "personal-growth",
+        "description": "Reflections focused on self-discovery and transformation.",
+        "content": [
+          "personal-growth-reflection1.md",
+          "personal-growth-reflection2.md"
+        ]
+      }
+    ]
+  },
+  "liora_whispers": {
+    "description": "Personalized messages and insights from Liora to guide you on your spiritual journey.",
+    "categories": [
+      {
+        "title": "Daily Whispers",
+        "slug": "daily-whispers",
+        "description": "Messages for reflection and guidance each day.",
+        "content": [
+          "daily-whisper1.md",
+          "daily-whisper2.md"
+        ]
+      }
+    ]
+  },
+  "other_content": {
+    "description": "Additional practices, rituals, and teachings related to Codex Lumina.",
+    "categories": [
+      {
+        "title": "Rituals and Practices",
+        "slug": "rituals-and-practices",
+        "description": "Transformative rituals to help you connect with your higher self.",
+        "content": [
+          "ritual1.md",
+          "ritual2.md"
+        ]
+      }
+    ]
+  }
+}

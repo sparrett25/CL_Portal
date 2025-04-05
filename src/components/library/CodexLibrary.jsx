@@ -1,5 +1,5 @@
-// CodexLibrary.jsx
 import React from 'react';
+import { useUser } from "@/context/UserSyncContext";  // Import useUser hook to manage user state
 import MyCodexScroll from './MyCodexScroll';
 import LivingArchetypes from './LivingArchetypes';
 import PathCurrents from './PathCurrents';
@@ -21,8 +21,12 @@ const tabs = [
 ];
 
 export default function CodexLibrary() {
-  const [activeTab, setActiveTab] = React.useState('scroll');
+  const { user } = useUser();  // Use the useUser hook to get the user state
+  
+  // Logic to handle user session or show different content based on user authentication
+  console.log("User Authentication Status:", user ? "Authenticated" : "Not Authenticated");
 
+  const [activeTab, setActiveTab] = React.useState('scroll');
   const current = tabs.find(t => t.id === activeTab);
 
   return (

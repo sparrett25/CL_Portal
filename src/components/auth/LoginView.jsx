@@ -1,51 +1,36 @@
-import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useUserSync } from "@/context/UserSyncContext";  // Correct import
 import { useNavigate } from "react-router-dom";
 
 export default function LoginView() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  const { user } = useUserSync();  // Get user from context
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  if (user) {
+    navigate("/home");  // Redirect to home page if already logged in
+  }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  const handleLogin = async (email, password) => {
+    // Login logic using Supabase
+    try {
+      const { user, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setErrorMsg(error.message);
-    } else {
-      navigate("/home"); // Or your desired route after login
+      if (error) {
+        console.error(error.message);
+      } else {
+        navigate("/home");  // Redirect to home page after successful login
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
   return (
-    <form onSubmit={handleLogin} className="space-y-6 max-w-md mx-auto mt-20">
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full p-2 border border-gray-700 rounded bg-black text-white"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="w-full p-2 border border-gray-700 rounded bg-black text-white"
-      />
-      <button
-        type="submit"
-        className="w-full bg-lime-500 hover:bg-lime-600 text-black font-bold py-2 px-4 rounded transition"
-      >
-        Login
-      </button>
-      {errorMsg && <p className="text-red-500 text-sm">{errorMsg}</p>}
-    </form>
+    <div>
+      <h1>Login</h1>
+      {/* Your login form */}
+    </div>
   );
 }

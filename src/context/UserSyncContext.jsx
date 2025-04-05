@@ -1,60 +1,43 @@
-// src/context/UserSyncContext.jsx
-
 import { createContext, useContext, useState, useEffect } from "react";
-import { supabase } from "@/lib/supabaseClient"; // Correctly import supabase client
+import { supabase } from "@/lib/supabase";
 
-// ✅ Default safe shape to prevent undefined destructuring
-const defaultContext = {
-  userProfile: null,
-  setUserProfile: () => {},
-  loading: true,
-};
+const UserSyncContext = createContext();
 
-export const UserSyncContext = createContext(defaultContext);
-
-// ✅ Custom hook to access the context
-export const useUserSync = () => useContext(UserSyncContext);
-
-// ✅ Provider that wraps the app and syncs user profile from Supabase
 export function UserSyncProvider({ children }) {
-  const [userProfile, setUserProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // Track loading state
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        setUserProfile(null);
-        setLoading(false);
-        return;
+    const fetchSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setUser(session.user); // Set user if session exists
       }
-
-      const { data: profile, error: profileError } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (profileError) {
-        console.warn("Failed to fetch user profile:", profileError.message);
-        setUserProfile(null);
-      } else {
-        setUserProfile(profile);
-      }
-
-      setLoading(false);
+      setLoading(false); // Set loading to false after session fetch
     };
 
-    fetchProfile();
-  }, []); // Fetch profile on mount
+    fetchSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session ? session.user : null); // Update user state
+      setLoading(false); // Set loading to false when auth state changes
+    });
+
+    // Cleanup on unmount
+    return () => {
+      if (authListener?.unsubscribe) {
+        authListener.unsubscribe();
+      }
+    };
+  }, []);
 
   return (
-    <UserSyncContext.Provider value={{ userProfile, setUserProfile, loading }}>
+    <UserSyncContext.Provider value={{ user, loading }}>
       {children}
     </UserSyncContext.Provider>
   );
+}
+
+export function useUserSync() {
+  return useContext(UserSyncContext) || { user: null, loading: true }; // Ensure valid return
 }
