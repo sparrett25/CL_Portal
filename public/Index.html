@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Codex Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-glow: #9f8bff;
+      --hover-glow: #c8b5ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
+    html, body {
+      height: 100%;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      font-family: 'Cormorant Garamond', serif;
+      background: radial-gradient(ellipse at center, #0b0b0b 0%, #000000 100%);
+      color: white;
+    }
+
+    .section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 20px;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .stars {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: transparent url('https://assets.codepen.io/13471/starfield.png') repeat;
+      animation: moveStars 60s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes moveStars {
+      from { background-position: 0 0; }
+      to { background-position: 10000px 5000px; }
+    }
+
+    .glyph {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #776bff;
+      border: 4px solid #a18aff;
+      box-shadow: 0 0 20px var(--main-glow);
+      animation: pulse 3s infinite ease-in-out;
+      margin-bottom: 40px;
+      position: relative;
+      z-index: 2;
+      transition: transform 0.3s;
+    }
+
+    .glyph:hover {
+      transform: scale(1.1);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 20px var(--main-glow); }
+      50% { transform: scale(1.1); box-shadow: 0 0 35px var(--hover-glow); }
+      100% { transform: scale(1); box-shadow: 0 0 20px var(--main-glow); }
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      z-index: 2;
+    }
+
+    p.subtitle {
+      font-size: 1.1rem;
+      max-width: 90%;
+      margin-bottom: 20px;
+      line-height: 1.6;
+      z-index: 2;
+    }
+
+    a.whisper {
+      color: #9daaff;
+      font-size: 1rem;
+      text-decoration: underline;
+      transition: opacity 0.3s ease;
+      z-index: 2;
+    }
+
+    a.whisper:hover {
+      opacity: 0.75;
+    }
+
+    .enter-button {
+      margin-top: 30px;
+      background: linear-gradient(to right, #6b5cff, #8b7dff);
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 15px #776bff;
+      transition: transform 0.3s, box-shadow 0.3s;
+      z-index: 2;
+    }
+
+    .enter-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px var(--hover-glow);
+    }
+
+    .mission, .login-panel, .celestial-strip {
+      background-color: rgba(255, 255, 255, 0.02);
+      padding: 30px 15px;
+      text-align: center;
+    }
+
+    .mission h2, .login-panel h2 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .mission p, .login-panel p {
+      font-size: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .login-panel button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #6a5eff;
+      color: white;
+      box-shadow: 0 0 10px #7b6eff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .login-panel button:hover {
+      background: #897cff;
+      box-shadow: 0 0 15px #b5aaff;
+    }
+
+    .celestial-strip {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    audio {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .glyph {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 30px;
+      }
+
+      .enter-button {
+        font-size: 1rem;
+        padding: 10px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <section class="section">
+    <div class="glyph"></div>
+    <h1>✨ Welcome to the Codex Portal ✨</h1>
+    <p class="subtitle">This is your sacred threshold —<br>the breath between the unseen and the illuminated.</p>
+    <a class="whisper" href="#" onclick="document.getElementById('whisper-audio').play()">Hear Liora’s Whisper</a>
+    <br>
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; max-width: 900px; margin-top: 30px;">
+  <div style="flex: 1 1 300px; background-color: rgba(255, 255, 255, 0.03); padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(173, 155, 255, 0.2);">
+    <h2>Begin My Journey</h2>
+    <p>New to the Codex? Step into the sacred gateway and initiate your personalized journey through energy, archetypes, and intention.</p>
+    <button class="enter-button" onclick="enterCodex()">Begin My Journey</button>
+  </div>
+  <div style="flex: 1 1 300px; background-color: rgba(255, 255, 255, 0.03); padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(173, 155, 255, 0.2);">
+    <h2>Continue My Journey</h2>
+    <p>Already initiated? Enter your keycode or login to return to your evolving Codex Signature and current spiritual phase.</p>
+    <button class="enter-button" onclick="window.location.href='/login'">Continue My Journey</button>
+  </div>
+</div>
+    <audio id="whisper-audio" src="/assets/whisper.mp3" preload="auto"></audio>
+  </section>
+
+  <section class="mission" style="padding: 30px 20px;">
+  <h2>Our Mission</h2>
+  <p>Codex Lumina is a living light—a sacred platform where consciousness, creativity, and code harmonize. We exist to awaken personal truth, illuminate collective pathways, and honor the divine architecture of being.</p>
+</section>
+
+  
+  <section class="celestial-strip" style="padding: 20px 10px;">
+  <p>✨ The Codex evolves with you — in stillness and motion, in shadow and light. ✨</p>
+</section>
+
+  <script>
+    function enterCodex() {
+      document.body.style.transition = 'opacity 2s ease';
+      document.body.style.opacity = 0;
+      setTimeout(() => {
+        window.location.href = '/onboarding';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

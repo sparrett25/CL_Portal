@@ -1,0 +1,11 @@
+<!-- /public/glyphs/seeker.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <circle cx="50" cy="50" r="48" stroke="white" stroke-width="4" fill="url(#grad)" />
+  <path d="M50 15 L58 50 L50 85 L42 50 Z" fill="white" />
+  <defs>
+    <radialGradient id="grad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </radialGradient>
+  </defs>
+</svg>

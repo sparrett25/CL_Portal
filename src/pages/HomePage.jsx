@@ -1,6 +1,7 @@
 // pages/HomePage.jsx
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useUserSync } from "@/context/UserSyncContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { backgroundGradient } from "@/utils/CodexUIThemeGuide.js";
@@ -12,6 +13,7 @@ import {
 import { insertJournalEntry } from "@/services/journalService";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@uidotdev/usehooks";
+import { motion } from "framer-motion";
 
 // Components
 import SignatureProfileHeader from "@/components/SignatureProfileHeader";
@@ -25,6 +27,7 @@ import PhaseShiftRitual from "@/components/rituals/PhaseShiftRitual";
 import EvolutionMap from "@/components/dashboard/EvolutionMap";
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useUserSync();
   const { profile, loading: profileLoading } = useUserProfile(user) || {};
   const [readinessScore, setReadinessScore] = useState(null);
@@ -32,7 +35,9 @@ export default function HomePage() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [showJournalPrompt, setShowJournalPrompt] = useState(false);
   const [reflectionText, setReflectionText] = useState("");
-  const [highlightReflections, setHighlightReflections] = useState(false); // Added state for link highlight
+  const [highlightReflections, setHighlightReflections] = useState(false);
+  const [ambientPlaying, setAmbientPlaying] = useState(false);
+  const ambientRef = useState(new Audio("/sounds/ambient-celestial.mp3"))[0];
   const { width, height } = useWindowSize();
 
   const getNextPhase = (current) => {
@@ -60,13 +65,18 @@ export default function HomePage() {
     }
   }, [user, profile]);
 
-  // Trigger highlight for Reflections link
   useEffect(() => {
     if (highlightReflections) {
       const timer = setTimeout(() => setHighlightReflections(false), 4000);
       return () => clearTimeout(timer);
     }
   }, [highlightReflections]);
+
+  useEffect(() => {
+    ambientRef.loop = true;
+    ambientRef.volume = 0.3;
+    ambientPlaying ? ambientRef.play() : ambientRef.pause();
+  }, [ambientPlaying]);
 
   if (authLoading || profileLoading) {
     return (
@@ -84,41 +94,71 @@ export default function HomePage() {
     );
   }
 
+  const glowColor = {
+    light: "from-indigo-300 to-purple-500",
+    neutral: "from-zinc-500 to-indigo-700",
+    dark: "from-purple-900 to-black",
+  }[profile.energy?.toLowerCase()] || "from-zinc-700 to-black";
+
   return (
-    <div className={`${backgroundGradient} min-h-screen px-4 py-8`}>
+    <div className={`min-h-screen px-4 py-8 relative overflow-hidden bg-gradient-to-br ${glowColor}`}>
+      {/* 🌌 Animated Background Aura */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/5 via-indigo-900/20 to-black opacity-50 pointer-events-none z-0 animate-pulse-slow" />
+
+      {/* 🜂 Floating Archetype Glyph */}
+      {profile.archetype && (
+        <img
+          src={`/glyphs/${profile.archetype.toLowerCase()}.svg`}
+          alt="Archetype Glyph"
+          className="absolute top-10 right-10 w-24 h-24 opacity-10 animate-spin-slow z-0"
+        />
+      )}
+
+      {/* 🎧 Ambient Sound Toggle */}
+      <button
+        onClick={() => setAmbientPlaying(!ambientPlaying)}
+        className="absolute top-4 left-4 z-50 bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded-md text-xs"
+      >
+        {ambientPlaying ? "Pause Ambience" : "Play Ambience"}
+      </button>
+
       {showCelebration && (
         <Confetti width={width} height={height} numberOfPieces={150} recycle={false} />
       )}
 
-      <div className="flex flex-col gap-6 max-w-5xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="flex flex-col gap-8 max-w-5xl mx-auto z-10 bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-indigo-400/20 ring-1 ring-indigo-400/10"
+      >
+        <h1 className="text-center text-2xl font-semibold text-white mb-4 animate-fade-in-up">
+          🌟 Welcome back, {profile.nickname || "Luminary"}
+        </h1>
+
         <SignatureProfileHeader profile={profile} />
         <DailyAlignmentSpotlight profile={profile} />
+        <div className="my-6 w-full border-t border-indigo-500/20 opacity-60" />
         <CollectivePulseCard />
         <LioraWhisperCard profile={profile} />
         <DailyRitualCard profile={profile} />
         <CompanionPanel profile={profile} />
         <JournalPreviewFeed profile={profile} />
 
-        {/* 🔗 Shortcut to Archive */}
         <div className="text-right">
-          <a
-            href="/reflections"
-            className={`text-sm transition ${
-              highlightReflections
-                ? "text-indigo-300 underline animate-pulse"
-                : "text-indigo-400 hover:underline"
-            }`}
+          <button
+            onClick={() => navigate("/journal")}
+            className={`text-sm transition text-indigo-400 hover:underline`}
           >
-            View All Reflections →
-          </a>
+            Open Full Journal →
+          </button>
         </div>
 
         <EvolutionMap userId={user.id} />
 
         {readinessScore !== null && (
           <div className="text-center text-sm text-indigo-300 mt-2">
-            🔍 Phase Readiness Score:{" "}
-            <span className="font-bold">{readinessScore}</span>/100
+            🔍 Phase Readiness Score: <span className="font-bold">{readinessScore}</span>/100
             <div className="text-xs text-zinc-400 mt-1">
               (Based on journal tone, rituals, and time since last shift)
             </div>
@@ -147,7 +187,7 @@ export default function HomePage() {
                 whisper.play();
                 setShowCelebration(false);
                 setShowJournalPrompt(true);
-                setHighlightReflections(true); // Trigger highlight after phase shift
+                setHighlightReflections(true);
               }, 4000);
             }}
           />
@@ -174,14 +214,14 @@ export default function HomePage() {
                 await insertJournalEntry(user.id, reflectionText, "phase-shift");
                 setReflectionText("");
                 setShowJournalPrompt(false);
-                setHighlightReflections(true); // Trigger highlight after journal save
+                setHighlightReflections(true);
               }}
             >
               Save Reflection
             </button>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }
