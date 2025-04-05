@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useUserSync } from "@/context/UserSyncContext"; // Correct import for useUserSync
-import LoginView from "@/components/Auth/LoginView";
+import LoginView from "@/components/auth/LoginView";
 import HomePage from "@/pages/HomePage";
 import CodexLibrary from "@/pages/CodexLibrary";
 import PortalView from "@/pages/PortalView";
