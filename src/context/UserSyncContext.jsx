@@ -5,28 +5,37 @@ const UserSyncContext = createContext();
 
 export function UserSyncProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);  // Added loading state to track fetching status
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();  // Updated for v2.x
+      const { data: { session } } = await supabase.auth.getSession();
       setUser(session ? session.user : null);
-      setLoading(false);  // Stop loading once data is fetched
+      setLoading(false);
     };
 
     fetchSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session ? session.user : null);  // Update user state when auth state changes
+      setUser(session ? session.user : null);
+      setLoading(false);
     });
 
     return () => {
-      authListener?.unsubscribe();  // Proper cleanup
+      if (authListener?.unsubscribe) {
+        authListener.unsubscribe();
+      }
     };
   }, []);
 
+  // Sign out function
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
   return (
-    <UserSyncContext.Provider value={{ user, loading }}>
+    <UserSyncContext.Provider value={{ user, loading, signOut }}>
       {children}
     </UserSyncContext.Provider>
   );

@@ -10,21 +10,18 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,         // Ensure this is the correct port for your development server
-    open: true,         // Automatically open the app in the browser
+    port: 3000,
+    open: true,
     hmr: {
-      protocol: process.env.VITE_USE_HTTPS === 'true' ? 'wss' : 'ws',  // Automatically switch to wss if HTTPS is used
-      host: 'localhost',  // WebSocket host, set to localhost for local development
-      port: 3000,         // Ensure this matches the port the Vite server is running on
-      clientPort: 3000,   // Ensure this matches the port used by the client
-    },
-    watch: {
-      usePolling: true,   // Helps resolve file-watching issues in some environments (e.g., Docker, VMs)
+      protocol: process.env.VITE_USE_HTTPS === 'true' ? 'wss' : 'ws',
+      host: 'localhost',
+      port: 3000,
+      clientPort: 3000,
     },
   },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
   },
-  base: '/',  // Make sure this is correct for your app's base URL
+  base: '/',
 });

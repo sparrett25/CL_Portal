@@ -1,28 +1,50 @@
-import React, { useEffect, useState } from "react";
-import { useUserSync } from "@/context/UserSyncContext";  // Make sure the hook is correctly imported
+// pages/HomePage.jsx
+
+import { useUserSync } from "@/context/UserSyncContext";
+import { useUserProfile } from "@/hooks/useUserProfile";
+
+// Visual theme guide
+import { backgroundGradient } from "@/utils/CodexUIThemeGuide.js";
+
+// Module Components
+import SignatureProfileHeader from "@/components/SignatureProfileHeader";
+import DailyAlignmentSpotlight from "@/components/dashboard/DailyAlignmentSpotlight";
+import CollectivePulseCard from "@/components/dashboard/CollectivePulseCard";
+import LioraWhisperCard from "@/components/dashboard/LioraWhisperCard";
+import DailyRitualCard from "@/components/dashboard/DailyRitualCard";
+import CompanionPanel from "@/components/dashboard/CompanionPanel";
+import JournalPreviewFeed from "@/components/JournalPreviewFeed";
 
 export default function HomePage() {
-  const { user, loading } = useUserSync();  // Destructure the user and loading state from the hook
+  const { user, loading: authLoading } = useUserSync();
+  const { profile, loading: profileLoading } = useUserProfile(user) || {};
 
-  useEffect(() => {
-    if (user) {
-      console.log("User is logged in:", user); // Log user data for debugging purposes
-    }
-  }, [user]);
-
-  if (loading) {
-    return <div>Loading...</div>;  // Show loading message while fetching the user
+  if (authLoading || profileLoading) {
+    return (
+      <div className="p-6 text-center text-lg text-white">
+        Preparing your Codex...
+      </div>
+    );
   }
 
-  if (!user) {
-    return <div>Please log in to view this page.</div>;  // If no user, show a login prompt
+  if (!user || !profile) {
+    return (
+      <div className="p-6 text-center text-red-300">
+        You must be signed in to access your Codex.
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white font-inter">
-      <div className="p-10 text-center">
-        <h1>Welcome to Codex Lumina ✨</h1>
-        <p>You’ve successfully logged in. This is your Home Page.</p>
+    <div className={`${backgroundGradient} min-h-screen px-4 py-8`}>
+      <div className="flex flex-col gap-6 max-w-5xl mx-auto">
+        <SignatureProfileHeader profile={profile} />
+        <DailyAlignmentSpotlight profile={profile} />
+        <CollectivePulseCard />
+        <LioraWhisperCard profile={profile} />
+        <DailyRitualCard profile={profile} />
+        <CompanionPanel profile={profile} />
+        <JournalPreviewFeed profile={profile} />
       </div>
     </div>
   );

@@ -1,3 +1,7 @@
 node_modules/
-build/
 .env
+dist/
+.next/
+.vite/
+.cache/
+.DS_Store

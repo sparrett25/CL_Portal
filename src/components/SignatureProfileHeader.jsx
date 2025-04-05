@@ -1,16 +1,10 @@
 // src/components/SignatureProfileHeader.jsx
-import { useUserSync } from "@/context/UserSyncContext"; // Correct import
 
-export default function SignatureProfileHeader() {
-  const { user } = useUserSync(); // Use the custom hook to get user data from context
+export default function SignatureProfileHeader({ profile }) {
+  if (!profile) return null;
 
-  if (!user) {
-    return null; // Ensure the profile header doesn't render if user is not available
-  }
+  const { energy, archetype, phase } = profile;
 
-  const { energy, archetype, phase } = user;  // Assuming these properties are available within the user object
-
-  // Optional: Apply different text colors based on energy alignment
   const energyColor = {
     Light: "text-yellow-300",
     Neutral: "text-teal-300",
