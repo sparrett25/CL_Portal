@@ -24,4 +24,7 @@ export default defineConfig({
     emptyOutDir: true,
   },
   base: '/',
+  optimizeDeps: {
+    include: ['date-fns'], // Add this line
+  }
 });

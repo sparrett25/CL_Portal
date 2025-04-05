@@ -1,3 +1,5 @@
+// pages/HomePage.jsx
+
 import { useEffect, useState } from "react";
 import { useUserSync } from "@/context/UserSyncContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
