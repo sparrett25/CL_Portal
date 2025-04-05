@@ -1,25 +1,29 @@
-import React from 'react';
-import { useUserSync } from '@/context/UserSyncContext'; // Correct import for useUserSync
+import React, { useEffect, useState } from "react";
+import { useUserSync } from "@/context/UserSyncContext";  // Make sure the hook is correctly imported
 
-const HomePage = () => {
-  const { user, loading } = useUserSync(); // Get user and loading state from context
+export default function HomePage() {
+  const { user, loading } = useUserSync();  // Destructure the user and loading state from the hook
 
-  // Display loading state if loading is true
+  useEffect(() => {
+    if (user) {
+      console.log("User is logged in:", user); // Log user data for debugging purposes
+    }
+  }, [user]);
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>;  // Show loading message while fetching the user
   }
 
-  // If user is not available, redirect to login page or display an appropriate message
   if (!user) {
-    return <div>You need to be logged in to view this page.</div>;
+    return <div>Please log in to view this page.</div>;  // If no user, show a login prompt
   }
 
   return (
-    <div>
-      <h1>Welcome, {user.email}</h1> {/* Assuming user has an email property */}
-      {/* Render more content for the logged-in user */}
+    <div className="min-h-screen bg-black text-white font-inter">
+      <div className="p-10 text-center">
+        <h1>Welcome to Codex Lumina ✨</h1>
+        <p>You’ve successfully logged in. This is your Home Page.</p>
+      </div>
     </div>
   );
-};
-
-export default HomePage;
+}
