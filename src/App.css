@@ -10,7 +10,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-
 }
 
 .animate-fade-in-up {
@@ -205,4 +204,139 @@ input {
 
 .text-sm {
   font-size: 0.875rem;
+}
+
+/* === Avatar & Journal Styling === */
+
+/* Avatar container */
+.avatar-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: glow-border 2s ease-in-out infinite;
+  border-radius: 1rem;
+  padding: 15px;
+  background: linear-gradient(135deg, #4e00ff, #800080); /* Purple gradient */
+}
+
+/* Left and right effects (gradient glow lines) */
+.avatar-deco {
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
+  top: 0;
+  z-index: -1;
+  animation: glowing-background 5s ease-in-out infinite;
+}
+
+.avatar-deco.left {
+  left: 0;
+}
+
+.avatar-deco.right {
+  right: 0;
+}
+
+/* Styling for the avatar itself */
+.avatar-img {
+  width: 150px;
+  height: 200px;
+  border-radius: 1rem;
+  object-fit: cover;
+  opacity: 0.9;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Optional text below the avatar */
+.avatar-text {
+  font-size: 0.875rem;
+  color: #e4e4e7;
+  text-align: center;
+  margin-top: 10px;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* Glowing background effect behind avatar */
+@keyframes glowing-background {
+  0% {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent);
+  }
+  50% {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.4), transparent);
+  }
+  100% {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent);
+  }
+}
+
+/* === Glyph & Visual Enhancements === */
+
+/* Glowing Glyph Effect */
+@keyframes glyph-glow {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+}
+
+.glyph-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1; /* Ensures it's visible */
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+
+.glyph-deco-left,
+.glyph-deco-right {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
+  z-index: -1; /* Place behind the avatar */
+}
+
+.glyph-deco-left {
+  left: 0;
+  animation: glyph-glow 4s ease-in-out infinite;
+}
+
+.glyph-deco-right {
+  right: 0;
+  animation: glyph-glow 4s ease-in-out infinite;
+}
+
+/* Animation for glowing */
+@keyframes glowing-background {
+  0% {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent);
+  }
+  50% {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.4), transparent);
+  }
+  100% {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent);
+  }
+}
+
+.animate-glow {
+  animation: glowing-background 5s ease-in-out infinite;
 }

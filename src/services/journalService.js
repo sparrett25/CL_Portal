@@ -1,21 +1,38 @@
-// services/journalService.js
-
 import { supabase } from "@/lib/supabase";
 
-// Existing functions
-export async function insertJournalEntry(userId, content, tag = "general") {
+// Save a new journal entry
+export async function insertJournalEntry(userId, content, type = "user", tone_tags = []) {
   const { error } = await supabase.from("journal_entries").insert([
     {
       user_id: userId,
       content,
-      tag,
-      created_at: new Date().toISOString(),
+      entry_type: type,  // Add 'entry_type' field
+      tone_tags,         // Include 'tone_tags' field
     },
   ]);
-
-  if (error) console.error("Error saving journal entry:", error.message);
+  if (error) {
+    console.error("Failed to insert journal entry:", error);
+    throw error;
+  }
 }
 
+// Fetch recent journal entries (limit or preview)
+export async function getJournalEntries(userId) {
+  const { data, error } = await supabase
+    .from("journal_entries")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Failed to load journal entries:", error);
+    return [];
+  }
+
+  return data;
+}
+
+// Fetch all entries without limit (for full reflection archive)
 export async function getAllJournalEntries(userId) {
   const { data, error } = await supabase
     .from("journal_entries")
@@ -24,38 +41,52 @@ export async function getAllJournalEntries(userId) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching journal entries:", error.message);
+    console.error("Failed to fetch all journal entries:", error);
     return [];
   }
 
   return data;
 }
 
-// New function to get user journal tone history
-export async function getUserJournalToneHistory(userId) {
+// Get tone history for phase readiness scoring
+export async function getUserJournalToneHistory(userId, limit = 15) {
   const { data, error } = await supabase
     .from("journal_entries")
-    .select("content")  // Assuming the tone is embedded in the content field
+    .select("tone, created_at")
     .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
   if (error) {
-    console.error("Error fetching journal tone history:", error.message);
+    console.error("Failed to fetch tone history:", error);
     return [];
   }
 
-  // Here, you would need to analyze the content to extract tones. 
-  // Assuming you have a way to extract the tone from each entry's content.
-  const tones = data.map(entry => extractToneFromContent(entry.content));
-  return tones;
+  return data;
 }
 
-// Helper function to analyze the tone from the content (for example purposes)
-function extractToneFromContent(content) {
-  // This function should return the tone based on content. 
-  // For example, you could use some natural language processing or simple keywords:
-  if (content.includes("struggle")) return "struggle";
-  if (content.includes("hopeful")) return "hopeful";
-  if (content.includes("breakthrough")) return "breakthrough";
-  return "neutral";
+// ✏️ Update a journal entry
+export async function updateJournalEntry(id, content) {
+  const { error } = await supabase
+    .from("journal_entries")
+    .update({ content })
+    .eq("id", id);
+
+  if (error) {
+    console.error("Failed to update journal entry:", error);
+    throw error;
+  }
+}
+
+// 🗑️ Delete a journal entry
+export async function deleteJournalEntry(id) {
+  const { error } = await supabase
+    .from("journal_entries")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Failed to delete journal entry:", error);
+    throw error;
+  }
 }

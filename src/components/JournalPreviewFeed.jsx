@@ -3,7 +3,7 @@
 import { useLatestJournalEntry } from "@/hooks/useLatestJournalEntry";
 import { motion } from "framer-motion";
 
-export default function JournalPreviewFeed({ profile }) {
+export default function JournalPreviewFeed({ profile, onOpenFullJournal }) {
   const { entry, loading } = useLatestJournalEntry(profile?.id);
 
   return (
@@ -35,7 +35,10 @@ export default function JournalPreviewFeed({ profile }) {
         )}
       </div>
 
-      <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+      <button
+        className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+        onClick={onOpenFullJournal}
+      >
         Open Full Journal
       </button>
     </motion.div>

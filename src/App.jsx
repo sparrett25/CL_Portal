@@ -9,7 +9,8 @@ import HomePage from "@/pages/HomePage";
 import CodexLibrary from "@/pages/CodexLibrary";
 import PortalView from "@/pages/PortalView";
 import UserProfile from "@/pages/UserProfile";
-import Reflections from "@/pages/Reflections"; // 🆕 New page
+import Reflections from "@/pages/Reflections";
+import JournalPage from "@/pages/JournalPage"; // ✅ New Import
 
 export default function App() {
   const { user, loading } = useUserSync();
@@ -28,7 +29,8 @@ export default function App() {
           <Route path="/home" element={user ? <HomePage /> : <Navigate to="/login" />} />
           <Route path="/library" element={user ? <CodexLibrary /> : <Navigate to="/login" />} />
           <Route path="/profile" element={user ? <UserProfile /> : <Navigate to="/login" />} />
-         <Route path="/reflections" element={user ? <Reflections /> : <Navigate to="/login" />} />// 🆕 New page
+          <Route path="/reflections" element={user ? <Reflections /> : <Navigate to="/login" />} />
+          <Route path="/journal" element={user ? <JournalPage /> : <Navigate to="/login" />} /> {/* ✅ NEW ROUTE */}
           <Route path="*" element={<div className="p-10 text-center">404 – Page not found</div>} />
         </Routes>
       </Router>

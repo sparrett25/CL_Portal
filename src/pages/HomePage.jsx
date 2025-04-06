@@ -143,16 +143,7 @@ export default function HomePage() {
         <LioraWhisperCard profile={profile} />
         <DailyRitualCard profile={profile} />
         <CompanionPanel profile={profile} />
-        <JournalPreviewFeed profile={profile} />
-
-        <div className="text-right">
-          <button
-            onClick={() => navigate("/journal")}
-            className={`text-sm transition text-indigo-400 hover:underline`}
-          >
-            Open Full Journal →
-          </button>
-        </div>
+        <JournalPreviewFeed profile={profile} onOpenFullJournal={() => navigate("/journal")} />
 
         <EvolutionMap userId={user.id} />
 
