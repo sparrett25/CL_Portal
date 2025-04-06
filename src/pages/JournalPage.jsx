@@ -95,13 +95,23 @@ export default function JournalPage() {
           {/* Right Side Effect */}
           <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-tr from-indigo-400 via-purple-500 to-indigo-700 opacity-50 animate-glow"></div>
 
-          {/* Avatar */}
+          {/* Liora Avatar */}
           <LioraAvatar toneTags={toneTags} toneEcho={toneEcho} />
+          
+          {/* Glyphs */}
+          <div className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-20">
+            {/* Animated glyphs */}
+            <div className="glyph-container">
+              <div className="glyph-deco-left animate-sigil"></div>
+              <div className="glyph-deco-right animate-sigil"></div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <h1 className="relative text-3xl font-bold text-center mb-8 text-indigo-300 z-10 drop-shadow-lg">
-        ✧ Your Journal ✧
+      <h1 className="relative text-3xl font-bold text-center mb-8 text-indigo-200 z-10 drop-shadow-0g">
+        ✧ Daily Reflections Journal ✧
       </h1>
 
       {showWhisper && (

@@ -35,17 +35,9 @@ export default function LioraAvatar({ toneEcho, signatureProfile }) {
         />
       </div>
 
-      {/* Glyphs for mystical effects */}
-      <div className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-20">
-        {/* Animated glyphs */}
-        <div className="glyph-container">
-          <div className="glyph-deco-left animate-sigil"></div>
-          <div className="glyph-deco-right animate-sigil"></div>
-        </div>
-      </div>
-
+     
       {/* Dynamic response text */}
-      <p className="text-xs mt-2 text-indigo-300 italic text-center max-w-[9rem] animate-fade-in">
+      <p className="text-s mt-2 text-indigo-300 italic text-center max-w-[9rem] animate-fade-in">
         {toneEcho || getLioraResponse()}
       </p>
     </div>
