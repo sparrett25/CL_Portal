@@ -32,7 +32,7 @@ export default function PortalView() {
       </div>
 
       {/* 🗝️ Welcome Message */}
-      <h1 className="text-4xl sm:text-5xl font-bold z-10">✦ Welcome to the Codex Portal ✦</h1>
+      <h1 className="text-4xl sm:text-5xl font-bold z-10">✦ Codex Lumina ✦</h1>
       <p className="text-zinc-400 mt-4 text-lg max-w-xl z-10">
         This is your sacred threshold — the breath between the unseen and the illuminated.
       </p>
@@ -49,9 +49,9 @@ export default function PortalView() {
       {/* 🚪 Dual Entry Boxes */}
       <div className="mt-10 z-10 flex flex-wrap justify-center gap-6 w-full max-w-4xl">
         <div className="bg-white/5 p-6 rounded-xl shadow-md flex-1 min-w-[280px]">
-          <h2 className="text-xl font-semibold mb-2">Begin My Journey</h2>
+          <h2 className="text-xl font-semibold mb-2">New Users</h2>
           <p className="text-sm text-zinc-300 mb-4">
-            New to the Codex? Step into the sacred gateway and initiate your personalized journey through energy, archetypes, and intention.
+            Register here - your journey awaits.
           </p>
           <button
             onClick={() => navigate("/onboarding")}
@@ -61,9 +61,9 @@ export default function PortalView() {
           </button>
         </div>
         <div className="bg-white/5 p-6 rounded-xl shadow-md flex-1 min-w-[280px]">
-          <h2 className="text-xl font-semibold mb-2">Continue My Journey</h2>
+          <h2 className="text-xl font-semibold mb-2">Returning Users</h2>
           <p className="text-sm text-zinc-300 mb-4">
-            Already initiated? Enter your keycode or login to return to your evolving Codex Signature and current spiritual phase.
+            Welcome back - your journey continues..
           </p>
           <button
             onClick={() => navigate("/login")}
