@@ -1,32 +1,37 @@
-// OnboardingRouter.jsx
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-import React, { useState } from 'react';
-import CodexKeyEntry from '@/views/Onboarding/CodexKeyEntry';
-import LensSelectionStep from '@/views/Onboarding/LensSelectionStep';
-import VoiceCaptureRitual from '@/views/Onboarding/VoiceCaptureRitual';
-import Dashboard from '@/views/Dashboard/Dashboard';
+// ✅ Existing working steps
+import WelcomeIntro from "@/onboarding/WelcomeIntro";
+import JourneyOverview from "@/onboarding/JourneyOverview";
+import Assessment from "@/onboarding/Assessment";
+import ProfileReveal from "@/onboarding/ProfileReveal";
+import VoiceCapture from "@/onboarding/VoiceCapture";
+
+// 🌀 Optional: Replace these once files exist
+// import CodexKeyEntry from "./CodexKeyEntry";
+// import LensSelectionStep from "./LensSelectionStep";
+// import VoiceCaptureRitual from "./VoiceCaptureRitual";
+// import Dashboard from "../Dashboard/Dashboard";
 
 const OnboardingRouter = () => {
-  const [step, setStep] = useState('codexKey');
-
-  const advanceTo = (nextStep) => setStep(nextStep);
-
   return (
-    <>
-      {step === 'codexKey' && (
-        <CodexKeyEntry onComplete={() => advanceTo('lensSelection')} />
-      )}
+    <Routes>
+      <Route path="welcome" element={<WelcomeIntro />} />
+      <Route path="overview" element={<JourneyOverview />} />
+      <Route path="assessment" element={<Assessment />} />
+      <Route path="voice-capture" element={<VoiceCapture />} />
+      <Route path="reveal" element={<ProfileReveal />} />
 
-      {step === 'lensSelection' && (
-        <LensSelectionStep onComplete={() => advanceTo('voiceCapture')} />
-      )}
+      {/* Optional placeholder for when components are ready */}
+      {/* <Route path="key-entry" element={<CodexKeyEntry />} /> */}
+      {/* <Route path="lens-selection" element={<LensSelectionStep />} /> */}
+      {/* <Route path="voice" element={<VoiceCaptureRitual />} /> */}
+      {/* <Route path="/dashboard" element={<Dashboard />} /> */}
 
-      {step === 'voiceCapture' && (
-        <VoiceCaptureRitual onComplete={() => advanceTo('dashboard')} />
-      )}
-
-      {step === 'dashboard' && <Dashboard />}
-    </>
+      {/* Default fallback */}
+      <Route path="*" element={<Navigate to="welcome" replace />} />
+    </Routes>
   );
 };
 

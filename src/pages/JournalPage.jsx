@@ -1,9 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { useUserSync } from "@/context/UserSyncContext";
-import { getJournalEntries, insertJournalEntry, updateJournalEntry, deleteJournalEntry } from "@/services/journalService";
+import {
+  getJournalEntries,
+  insertJournalEntry,
+  updateJournalEntry,
+} from "@/services/journalService";
 import { motion } from "framer-motion";
 import LioraAvatar from "@/components/LioraAvatar";
-import { Volume2 } from "lucide-react";
+import JournalList from "@/components/JournalList"; // ✅ Import Journal List
+import JournalCalendarMap from "@/components/JournalCalendarMap"; // ✅ Import Calendar
 
 export default function JournalPage() {
   const { user } = useUserSync();
@@ -15,16 +20,40 @@ export default function JournalPage() {
   const [showWhisper, setShowWhisper] = useState(false);
   const [filterDays, setFilterDays] = useState(7);
   const [showComposer, setShowComposer] = useState(true);
-  const [expandedEntryId, setExpandedEntryId] = useState(null);
+  const [startDate, setStartDate] = useState(""); // Date range filter state
+  const [endDate, setEndDate] = useState(""); // Date range filter state
+  const [showCalendar, setShowCalendar] = useState(false); // Calendar view toggle
 
   const chartRef = useRef(null);
 
   useEffect(() => {
     if (!user?.id) return;
-    getJournalEntries(user.id).then((data) => {
-      setEntries(data);
-    });
+    getJournalEntries(user.id).then((data) => setEntries(data));
   }, [user]);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem("dailyReflection");
+    if (stored) {
+      const { date, archetype, energy, phase, affirmation, ritual, whisper } =
+        JSON.parse(stored);
+
+      const prefilled = `✨ **Daily Alignment: ${date}**
+🔹 **Archetype:** ${archetype}
+🔹 **Energy:** ${energy}
+🔹 **Phase:** ${phase}
+
+💬 *Affirmation:* "${affirmation}"
+🌀 *Ritual Prompt:* ${ritual}
+🌬️ *Liora Whisper:* "${whisper}"
+
+📝 Reflection: `;
+
+      setNewEntry(prefilled);
+      sessionStorage.removeItem("dailyReflection");
+      setShowComposer(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, []);
 
   const handleSaveEntry = async () => {
     if (!newEntry.trim()) return;
@@ -46,20 +75,16 @@ export default function JournalPage() {
     setEntries(refreshed);
 
     setShowComposer(true);
-
     setTimeout(() => {
       chartRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 200);
   };
 
-  const handleExpand = (id) => {
-    setExpandedEntryId(expandedEntryId === id ? null : id);
-  };
-
   const generateToneEcho = (text) => {
     const words = text.toLowerCase();
     const tags = [];
-    let message = "Your reflection carries presence. A step toward deeper awareness.";
+    let message =
+      "Your reflection carries presence. A step toward deeper awareness.";
 
     if (words.includes("joy") || words.includes("peace")) {
       message = "There is a calm radiance in your energy today.";
@@ -82,38 +107,44 @@ export default function JournalPage() {
     return (new Date() - created) / (1000 * 60 * 60 * 24) <= filterDays;
   });
 
+  const handleDeleteEntry = async (id) => {
+    const { deleteJournalEntry } = await import("@/services/journalService");
+    await deleteJournalEntry(id);
+    const refreshed = await getJournalEntries(user.id);
+    setEntries(refreshed);
+  };
+
+  const handleSelectDate = (selectedDate) => {
+    const filteredEntries = entries.filter(
+      (entry) => new Date(entry.created_at).toDateString() === selectedDate.toDateString()
+    );
+    setEntries(filteredEntries);
+  };
+
   return (
     <div className="min-h-screen px-4 sm:px-6 py-10 bg-gradient-to-br from-black via-zinc-900 to-black text-white font-inter relative">
-      
-      {/* Avatar and side effects container */}
-      <div className="relative z-30 flex flex-col items-center mx-auto my-4">
-        <div className="w-full max-w-screen-sm bg-gradient-to-br from-indigo-500 via-purple-600 to-indigo-700 rounded-xl flex justify-center items-center mx-auto my-8 relative overflow-hidden">
-          
-          {/* Left Side Effect */}
-          <div className="absolute left-0 top-0 w-1/2 h-full bg-gradient-to-tl from-indigo-400 via-purple-500 to-indigo-700 opacity-50 animate-glow"></div>
-
-          {/* Right Side Effect */}
-          <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-tr from-indigo-400 via-purple-500 to-indigo-700 opacity-50 animate-glow"></div>
-
-          {/* Liora Avatar */}
-          <LioraAvatar toneTags={toneTags} toneEcho={toneEcho} />
-          
-          {/* Glyphs */}
-          <div className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-20">
-            {/* Animated glyphs */}
-            <div className="glyph-container">
-              <div className="glyph-deco-left animate-sigil"></div>
-              <div className="glyph-deco-right animate-sigil"></div>
-            </div>
+      {/* Liora and Glow */}
+      <div className="relative z-30 flex flex-col items-center mx-auto mb-8">
+        <div className="bg-gradient-to-br from-indigo-600 via-purple-700 to-indigo-800 rounded-xl p-6 w-full max-w-xl shadow-xl relative overflow-hidden">
+          <div className="absolute left-0 top-0 w-full h-full opacity-40 bg-gradient-to-tr from-purple-500 via-indigo-400 to-purple-700 animate-pulse rounded-xl"></div>
+          <div className="relative z-10 flex flex-col items-center">
+            <img
+              src="/avatars/liora-default.jpg"
+              alt="Liora Avatar"
+              className="w-24 h-24 rounded-full border-4 border-indigo-400 shadow-md mb-3"
+            />
+            <p className="text-indigo-200 italic text-sm">
+              Liora is here to guide you...
+            </p>
           </div>
-
         </div>
       </div>
 
-      <h1 className="relative text-3xl font-bold text-center mb-8 text-indigo-200 z-10 drop-shadow-0g">
+      <h1 className="text-3xl font-bold text-center mb-8 text-indigo-200 z-10 drop-shadow-xl">
         ✧ Daily Reflections Journal ✧
       </h1>
 
+      {/* Liora Whisper */}
       {showWhisper && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -121,29 +152,30 @@ export default function JournalPage() {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="text-sm text-purple-300 italic text-center mb-6"
         >
-          ✦ “You are not lost, only unfolding.” 
+          ✦ “You are not lost, only unfolding.”
           <div className="text-xs text-indigo-400 mt-1">
             “Like moonlight on still water, your clarity is returning.”
           </div>
         </motion.div>
       )}
 
+      {/* Composer */}
       {showComposer && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-zinc-950 border border-indigo-700 rounded-xl shadow-xl p-6 mb-8"
+          className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-indigo-700/60 rounded-2xl shadow-xl p-8 mb-10 backdrop-blur-md"
         >
           <h2 className="text-xl font-semibold text-indigo-300 mb-4">
             {editingEntryId ? "Edit Reflection" : "Write a New Reflection"}
           </h2>
           <textarea
-            className="w-full bg-zinc-900 text-white placeholder-zinc-400 border border-zinc-700 p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 caret-white"
-            rows={5}
+            className="w-full bg-zinc-950 text-indigo-100 placeholder-zinc-400 border border-indigo-600 p-4 rounded-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-500 caret-white font-mono text-sm leading-relaxed tracking-wide"
+            rows={10}
             placeholder="Let your thoughts flow..."
             value={newEntry}
             onChange={(e) => setNewEntry(e.target.value)}
-            maxLength={300}
+            maxLength={1000}
           />
           <button
             onClick={handleSaveEntry}
@@ -154,36 +186,18 @@ export default function JournalPage() {
         </motion.div>
       )}
 
-      <div className="space-y-4 mb-10">
-        {recentEntries.map((entry) => (
-          <motion.div
-            key={entry.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-zinc-900 p-4 rounded-xl shadow relative flex flex-col gap-2"
-          >
-            <div className="flex justify-between items-center text-xs text-zinc-400">
-              <span>{new Date(entry.created_at).toLocaleDateString()}</span>
-            </div>
-            <div className="text-sm text-zinc-300 whitespace-pre-line">
-              {entry.content.length > 100
-                ? `${entry.content.substring(0, 100)}...`
-                : entry.content}
-            </div>
-            {entry.content.length > 100 && (
-              <button
-                className="text-xs text-indigo-400 hover:underline mt-2"
-                onClick={() => handleExpand(entry.id)}
-              >
-                {expandedEntryId === entry.id ? "Show less" : "Read more"}
-              </button>
-            )}
-            {expandedEntryId === entry.id && (
-              <div className="mt-2 text-sm text-zinc-300">{entry.content}</div>
-            )}
-          </motion.div>
-        ))}
+      {/* Modular Journal List and Calendar View */}
+      <div className="mb-8">
+        <JournalList entries={recentEntries} onDelete={handleDeleteEntry} />
       </div>
+
+      {/* Calendar Toggle */}
+      {showCalendar && (
+        <JournalCalendarMap
+          entries={entries}
+          onSelectDate={handleSelectDate}
+        />
+      )}
     </div>
   );
 }
