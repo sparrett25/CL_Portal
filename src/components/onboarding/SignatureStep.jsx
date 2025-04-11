@@ -12,7 +12,7 @@ const archetypes = [
 
 export default function SignatureStep() {
   const { setUserProfile } = useUser();
-  const navigate = useNavigate(); // 👈 Initialize navigation
+  const navigate = useNavigate();
 
   const [energy, setEnergy] = useState('');
   const [archetype, setArchetype] = useState('');
@@ -21,10 +21,10 @@ export default function SignatureStep() {
     if (energy && archetype) {
       setUserProfile({ energy, archetype });
 
-      // Small delay for subtle transition
+      // Optional celebration animation or sound cue could go here
       setTimeout(() => {
         navigate('/companion');
-      }, 800); // Optional delay for glow animation or confirmation sound
+      }, 800);
     }
   };
 
@@ -33,14 +33,18 @@ export default function SignatureStep() {
       <h1 className="text-3xl font-bold text-lime-300 mb-6">🌌 Your Codex Signature</h1>
 
       <div className="mb-6">
-        <label className="block text-white/80 mb-2 font-medium">⚡ Choose Your Energy Alignment:</label>
+        <label className="block text-white/80 mb-2 font-medium">
+          ⚡ Choose Your Energy Alignment:
+        </label>
         <div className="flex space-x-4">
           {energyOptions.map((option) => (
             <button
               key={option}
               onClick={() => setEnergy(option)}
-              className={`px-4 py-2 rounded-lg border ${
-                energy === option ? 'bg-violet-600' : 'bg-black border-white/30'
+              className={`px-4 py-2 rounded-lg transition border ${
+                energy === option
+                  ? 'bg-violet-600 border-violet-400 shadow-md'
+                  : 'bg-black border-white/30 hover:border-white/60'
               }`}
             >
               {option}
@@ -50,7 +54,9 @@ export default function SignatureStep() {
       </div>
 
       <div className="mb-6">
-        <label className="block text-white/80 mb-2 font-medium">🧬 Choose Your Archetype:</label>
+        <label className="block text-white/80 mb-2 font-medium">
+          🧬 Choose Your Archetype:
+        </label>
         <select
           value={archetype}
           onChange={(e) => setArchetype(e.target.value)}
@@ -58,7 +64,9 @@ export default function SignatureStep() {
         >
           <option value="">-- Select Archetype --</option>
           {archetypes.map((type) => (
-            <option key={type} value={type}>{type}</option>
+            <option key={type} value={type}>
+              {type}
+            </option>
           ))}
         </select>
       </div>

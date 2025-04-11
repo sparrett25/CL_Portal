@@ -6,9 +6,10 @@ import {
   updateJournalEntry,
 } from "@/services/journalService";
 import { motion } from "framer-motion";
-import LioraAvatar from "@/components/LioraAvatar";
-import JournalList from "@/components/JournalList"; // ✅ Import Journal List
-import JournalCalendarMap from "@/components/JournalCalendarMap"; // ✅ Import Calendar
+import PageFrame from "@/components/layout/PageFrame";
+import JournalList from "@/components/JournalList";
+import JournalCalendarMap from "@/components/JournalCalendarMap";
+import LioraWhisperCard from "@/components/liora/LioraWhisperCard";
 
 export default function JournalPage() {
   const { user } = useUserSync();
@@ -20,9 +21,9 @@ export default function JournalPage() {
   const [showWhisper, setShowWhisper] = useState(false);
   const [filterDays, setFilterDays] = useState(7);
   const [showComposer, setShowComposer] = useState(true);
-  const [startDate, setStartDate] = useState(""); // Date range filter state
-  const [endDate, setEndDate] = useState(""); // Date range filter state
-  const [showCalendar, setShowCalendar] = useState(false); // Calendar view toggle
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const chartRef = useRef(null);
 
@@ -32,10 +33,14 @@ export default function JournalPage() {
   }, [user]);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("dailyReflection");
-    if (stored) {
+    // Priority: dailyReflection > codexReflection > unsaved draft
+    const daily = sessionStorage.getItem("dailyReflection");
+    const codex = sessionStorage.getItem("codexReflection");
+    const draft = localStorage.getItem("unsavedJournalEntry");
+
+    if (daily) {
       const { date, archetype, energy, phase, affirmation, ritual, whisper } =
-        JSON.parse(stored);
+        JSON.parse(daily);
 
       const prefilled = `✨ **Daily Alignment: ${date}**
 🔹 **Archetype:** ${archetype}
@@ -50,9 +55,24 @@ export default function JournalPage() {
 
       setNewEntry(prefilled);
       sessionStorage.removeItem("dailyReflection");
-      setShowComposer(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (codex) {
+      const { energy, tone, archetype, seeking } = JSON.parse(codex);
+
+      const prefilled = `✨ **Your Sacred Reflection**
+🔹 **Energy Present:** ${energy || ""}
+🔹 **Tone:** ${tone || ""}
+🔹 **Archetype Resonance:** ${archetype || ""}
+🔹 **Seeking:** "${seeking || ""}"
+
+📝 Reflection: `;
+
+      setNewEntry(prefilled);
+    } else if (draft) {
+      setNewEntry(draft);
     }
+
+    setShowComposer(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const handleSaveEntry = async () => {
@@ -69,12 +89,25 @@ export default function JournalPage() {
     setToneTags(tone.tags);
     setNewEntry("");
     setEditingEntryId(null);
-    setShowWhisper(true);
+    setShowComposer(true);
 
+    // 🔁 Clear saved draft
+    localStorage.removeItem("unsavedJournalEntry");
+
+    // 🔮 Show whisper only after the first journal of the day
     const refreshed = await getJournalEntries(user.id);
     setEntries(refreshed);
 
-    setShowComposer(true);
+    const today = new Date().toDateString();
+    const firstToday = refreshed.filter(
+      (entry) =>
+        new Date(entry.created_at).toDateString() === today
+    );
+
+    if (firstToday.length === 1) {
+      setShowWhisper(true);
+    }
+
     setTimeout(() => {
       chartRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 200);
@@ -116,50 +149,22 @@ export default function JournalPage() {
 
   const handleSelectDate = (selectedDate) => {
     const filteredEntries = entries.filter(
-      (entry) => new Date(entry.created_at).toDateString() === selectedDate.toDateString()
+      (entry) =>
+        new Date(entry.created_at).toDateString() ===
+        selectedDate.toDateString()
     );
     setEntries(filteredEntries);
   };
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 py-10 bg-gradient-to-br from-black via-zinc-900 to-black text-white font-inter relative">
-      {/* Liora and Glow */}
-      <div className="relative z-30 flex flex-col items-center mx-auto mb-8">
-        <div className="bg-gradient-to-br from-indigo-600 via-purple-700 to-indigo-800 rounded-xl p-6 w-full max-w-xl shadow-xl relative overflow-hidden">
-          <div className="absolute left-0 top-0 w-full h-full opacity-40 bg-gradient-to-tr from-purple-500 via-indigo-400 to-purple-700 animate-pulse rounded-xl"></div>
-          <div className="relative z-10 flex flex-col items-center">
-            <img
-              src="/avatars/liora-default.jpg"
-              alt="Liora Avatar"
-              className="w-24 h-24 rounded-full border-4 border-indigo-400 shadow-md mb-3"
-            />
-            <p className="text-indigo-200 italic text-sm">
-              Liora is here to guide you...
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <h1 className="text-3xl font-bold text-center mb-8 text-indigo-200 z-10 drop-shadow-xl">
-        ✧ Daily Reflections Journal ✧
-      </h1>
-
-      {/* Liora Whisper */}
+    <PageFrame
+      title="✧ Daily Reflections Journal ✧"
+      subtitle="Liora is here to guide you… whispering between each word you release."
+    >
       {showWhisper && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="text-sm text-purple-300 italic text-center mb-6"
-        >
-          ✦ “You are not lost, only unfolding.”
-          <div className="text-xs text-indigo-400 mt-1">
-            “Like moonlight on still water, your clarity is returning.”
-          </div>
-        </motion.div>
+        <LioraWhisperCard toneEcho={toneEcho} toneTags={toneTags} />
       )}
 
-      {/* Composer */}
       {showComposer && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -174,7 +179,11 @@ export default function JournalPage() {
             rows={10}
             placeholder="Let your thoughts flow..."
             value={newEntry}
-            onChange={(e) => setNewEntry(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setNewEntry(val);
+              localStorage.setItem("unsavedJournalEntry", val);
+            }}
             maxLength={1000}
           />
           <button
@@ -186,18 +195,16 @@ export default function JournalPage() {
         </motion.div>
       )}
 
-      {/* Modular Journal List and Calendar View */}
       <div className="mb-8">
         <JournalList entries={recentEntries} onDelete={handleDeleteEntry} />
       </div>
 
-      {/* Calendar Toggle */}
       {showCalendar && (
         <JournalCalendarMap
           entries={entries}
           onSelectDate={handleSelectDate}
         />
       )}
-    </div>
+    </PageFrame>
   );
 }
