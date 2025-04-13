@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import DailyAlignmentPanel from "@/components/DailyAlignmentPanel"; // ✅ NEW IMPORT
+import DailyAlignmentPanel from "@/components/DailyAlignmentPanel"; // ✅ Panel: light/dark reflection
 
 export default function HomePage() {
   const [profile, setProfile] = useState(null);
@@ -15,6 +15,11 @@ export default function HomePage() {
         .select("archetype, energy, phase")
         .eq("id", user.id)
         .single();
+
+      if (error) {
+        console.error("Failed to fetch profile:", error);
+        return;
+      }
 
       if (data) setProfile(data);
     };
@@ -55,7 +60,7 @@ export default function HomePage() {
           This space is alive with your reflection. Let’s begin."</em>
         </p>
 
-        {/* 🔮 Inject the Living Daily Alignment Panel */}
+        {/* 🔮 Living Daily Alignment Panel */}
         <DailyAlignmentPanel
           archetype={archetype}
           energy={energy}

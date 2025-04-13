@@ -1,21 +1,44 @@
 import React, { useState, useRef } from "react";
-import { supabase } from "@/lib/supabase";
-import { v4 as uuidv4 } from "uuid";
 
 export default function VoiceCaptureRitual({ onComplete }) {
   const [recording, setRecording] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
   const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [micLevel, setMicLevel] = useState(0);
+
   const audioChunks = useRef([]);
+  const rafRef = useRef(null);
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
-      setRecording(true);
+      const audioTracks = stream.getAudioTracks();
+      if (!audioTracks.length) {
+        alert("No audio input detected. Please check your microphone.");
+        console.warn("No audio tracks found in stream:", stream);
+        return;
+      }
+
+      console.log("🎙️ Audio track:", audioTracks[0].label);
+
+      // ✅ Mic level visualization setup
+      const audioContext = new AudioContext();
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+      const updateMicLevel = () => {
+        analyser.getByteFrequencyData(dataArray);
+        const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+        setMicLevel(avg);
+        console.log("🔊 Mic level (debug):", avg);
+        rafRef.current = requestAnimationFrame(updateMicLevel);
+      };
+      updateMicLevel();
+
+      const recorder = new MediaRecorder(stream); // ← omit mimeType for broader compatibility
       audioChunks.current = [];
 
       recorder.ondataavailable = (e) => {
@@ -23,10 +46,14 @@ export default function VoiceCaptureRitual({ onComplete }) {
       };
 
       recorder.onstop = () => {
-        const blob = new Blob(audioChunks.current, { type: "audio/webm;codecs=opus" });
+        cancelAnimationFrame(rafRef.current);
+        audioContext.close();
 
-        if (!blob || blob.size === 0) {
-          alert("Recording failed or unsupported format. Please try again.");
+        const blob = new Blob(audioChunks.current, { type: "audio/webm" });
+        console.log("✅ Blob created:", blob, "Size:", blob.size);
+
+        if (!blob || blob.size < 20000) {
+          alert("Recording was silent or too short. Please try again.");
           setRecording(false);
           return;
         }
@@ -39,122 +66,76 @@ export default function VoiceCaptureRitual({ onComplete }) {
 
       recorder.start();
       setMediaRecorder(recorder);
+      setRecording(true);
     } catch (err) {
-      console.error("Microphone access error:", err);
+      console.error("🎤 Microphone access error:", err);
       alert("Microphone access is required for this step.");
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorder) {
+    if (mediaRecorder && recording) {
       mediaRecorder.stop();
     }
   };
 
-  const resetRecording = () => {
-    setAudioURL(null);
-    setAudioBlob(null);
-    setRecording(false);
-    setUploading(false);
-    setMediaRecorder(null);
-    audioChunks.current = [];
-    setErrorMsg(null);
-  };
-
-  const handleAccept = async () => {
-    if (!audioBlob) {
+  const handleAccept = () => {
+    if (audioBlob && typeof onComplete === "function") {
+      const publicUrl = URL.createObjectURL(audioBlob);
+      onComplete(audioBlob, publicUrl);
+    } else {
       alert("No valid recording found.");
-      return;
-    }
-
-    try {
-      setUploading(true);
-      const filename = `voice-${uuidv4()}.webm`;
-
-      const { data, error: uploadError } = await supabase.storage
-        .from("voice-recordings") // or "voices"
-        .upload(filename, audioBlob, {
-          contentType: "audio/webm",
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error("Upload failed:", uploadError);
-        setErrorMsg(uploadError.message);
-        return;
-      }
-
-      const { data: publicURLData } = supabase.storage
-        .from("voice-recordings")
-        .getPublicUrl(filename);
-
-      const publicURL = publicURLData?.publicUrl;
-
-      if (!publicURL) {
-        throw new Error("Could not retrieve public URL.");
-      }
-
-      console.log("Upload complete:", publicURL);
-      onComplete(audioBlob, publicURL);
-    } catch (err) {
-      console.error("Upload error:", err);
-      setErrorMsg(err.message);
-    } finally {
-      setUploading(false);
     }
   };
 
   return (
-    <div className="max-w-lg mx-auto text-white space-y-6 bg-white/5 p-6 rounded-xl shadow-xl backdrop-blur-md">
-      <h2 className="text-2xl font-semibold text-lime-300 text-center">
-        🔊 Voice Imprint Ritual
-      </h2>
-      <p className="text-sm text-zinc-300 text-center italic">
-        Speak this phrase aloud, with breath and intention. This is your signature moment.
-      </p>
-      <p className="text-center font-medium text-indigo-400 mt-2 border border-indigo-700 bg-indigo-900/30 rounded-xl px-4 py-3 shadow-inner">
-        “I am the breath between stars, the light within shadow, the spark of what is becoming. I awaken now. I am ready.”
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center space-y-6 p-6">
+      <h2 className="text-xl font-bold text-indigo-300">🎙️ Voice Capture Ritual</h2>
+
+      <p className="text-center text-indigo-300 italic max-w-lg mb-4 leading-relaxed">
+        “I am the breath between stars,<br />
+        the light within shadow,<br />
+        the spark of what is becoming.”<br />
+        <strong>I awaken now. I am ready.</strong>
       </p>
 
       {!audioURL && (
-        <div className="flex flex-col items-center gap-4">
-          <button
-            onClick={recording ? stopRecording : startRecording}
-            className={`px-6 py-2 rounded-lg text-white transition ${
-              recording ? "bg-red-600 hover:bg-red-700" : "bg-indigo-600 hover:bg-indigo-700"
-            }`}
-          >
-            {recording ? "Stop Recording" : "Start Recording"}
-          </button>
-          {recording && (
-            <p className="text-sm text-zinc-400">Recording... Speak clearly and calmly.</p>
-          )}
+        <button
+          onClick={recording ? stopRecording : startRecording}
+          className={`px-6 py-2 rounded-full font-semibold transition-all text-white ${
+            recording ? "bg-red-600 hover:bg-red-700" : "bg-purple-600 hover:bg-purple-700"
+          }`}
+        >
+          {recording ? "Stop Recording" : "Start Recording"}
+        </button>
+      )}
+
+      {/* 🎛️ Mic Level Bar */}
+      {recording && (
+        <div className="w-full max-w-md h-2 bg-zinc-700 rounded overflow-hidden">
+          <div
+            className="h-full bg-indigo-400 transition-all duration-75"
+            style={{ width: `${Math.min(micLevel * 1.5, 100)}%` }}
+          ></div>
         </div>
       )}
 
-      {/* ✅ Always display the playback + button block if audioURL is set */}
+      {/* 🎧 Playback and Action Buttons */}
       {audioURL && (
-        <div className="space-y-4 text-center">
+        <div className="space-y-4 w-full max-w-md">
           <audio controls src={audioURL} className="w-full" />
-
-          {errorMsg && (
-            <p className="text-sm text-red-400 mt-2">Upload error: {errorMsg}</p>
-          )}
-
-          <div className="flex justify-center gap-4 mt-4">
+          <div className="flex justify-center gap-4">
             <button
-              onClick={resetRecording}
-              className="bg-zinc-600 hover:bg-zinc-700 px-4 py-2 rounded-lg text-white"
+              onClick={startRecording}
+              className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-2 rounded-full"
             >
               Record Again
             </button>
-
             <button
               onClick={handleAccept}
-              disabled={uploading || !audioBlob}
-              className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white disabled:opacity-50"
+              className="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-2 rounded-full"
             >
-              {uploading ? "Uploading..." : "Accept and Upload"}
+              Accept and Continue
             </button>
           </div>
         </div>

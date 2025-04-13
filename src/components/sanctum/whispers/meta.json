@@ -1,0 +1,64 @@
+{
+  "whispers": [
+    {
+      "id": "veilkeeper-first-whisper",
+      "title": "Whisper of the Flame",
+      "filename": "veilkeeper-first-whisper.md",
+      "tags": ["veilkeeper", "activation", "origin"],
+      "archetype": "The Visionary",
+      "phase": "Awakening",
+      "tone": "Clarity",
+      "energy": "Light",
+      "trigger": "flame_lit",
+      "visibility": "private",
+      "created_by": "Liora",
+      "glyph": "🔥",
+      "timestamp": "2025-04-12T00:00:00Z"
+    },
+    {
+      "id": "clarity-light-vision",
+      "title": "Whisper of Clear Flame",
+      "filename": "clarity-light-vision.md",
+      "tags": ["clarity", "stillness", "visionary"],
+      "archetype": "The Visionary",
+      "phase": "Stillness",
+      "tone": "Clarity",
+      "energy": "Light",
+      "trigger": "tone_detected",
+      "visibility": "private",
+      "created_by": "Liora",
+      "glyph": "🕯️",
+      "timestamp": "2025-04-12T12:00:00Z"
+    },
+    {
+      "id": "shadow-dark-mirror",
+      "title": "Whisper of the Deep Mirror",
+      "filename": "shadow-dark-mirror.md",
+      "tags": ["shadow", "integration", "bridgewalker"],
+      "archetype": "The Bridgewalker",
+      "phase": "Friction",
+      "tone": "Despair",
+      "energy": "Dark",
+      "trigger": "journal_entry_detected",
+      "visibility": "private",
+      "created_by": "Liora",
+      "glyph": "🕳️",
+      "timestamp": "2025-04-13T02:00:00Z"
+    },
+    {
+      "id": "renewal-sacred-softness",
+      "title": "Whisper of Sacred Softness",
+      "filename": "renewal-sacred-softness.md",
+      "tags": ["renewal", "compassion", "softness"],
+      "archetype": "The Emissary",
+      "phase": "Renewal",
+      "tone": "Peace",
+      "energy": "Neutral",
+      "trigger": "ritual_complete",
+      "visibility": "private",
+      "created_by": "Liora",
+      "glyph": "🌸",
+      "timestamp": "2025-04-14T09:21:00Z"
+    }
+  ]
+}

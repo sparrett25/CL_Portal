@@ -28,7 +28,22 @@ export default function MainLayout() {
       <nav className="bg-zinc-950 px-4 sm:px-6 py-4 shadow-md flex items-center justify-between">
         {/* Logo + Brand */}
         <div className="flex items-center gap-2 text-indigo-400 font-bold text-xl tracking-wide">
-          <img src="/logo-sigil.svg" alt="Codex Sigil" className="w-6 h-6" />
+          <div
+            className="w-9 h-9 flex items-center justify-center rounded-xl transition-all"
+            style={{
+              background: "radial-gradient(circle at center, rgba(139,92,246,0.15), transparent 80%)",
+              boxShadow: "0 0 16px rgba(139,92,246,0.6)",
+              animation: "pulse 3s ease-in-out infinite",
+              padding: "4px"
+            }}
+          >
+            <img
+              src="/logo-sigil-transparent.png"
+              alt="Codex Sigil"
+              className="w-full h-full object-contain"
+              style={{ borderRadius: "0.5rem" }}
+            />
+          </div>
           Codex Lumina
         </div>
 

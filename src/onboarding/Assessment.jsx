@@ -11,7 +11,7 @@ export default function Assessment() {
   };
 
   return (
-    <div className="min-h-screen px-6 py-20 text-white font-inter bg-black text-center">
+    <div className="min-h-screen px-6 py-20 bg-black text-white font-inter text-center">
       <h1 className="text-3xl font-bold mb-6 text-indigo-400">🪞 The First Reflection</h1>
       <p className="text-zinc-400 max-w-xl mx-auto mb-10 italic">
         Take a breath. Feel your presence. Let these questions guide your inner alignment.

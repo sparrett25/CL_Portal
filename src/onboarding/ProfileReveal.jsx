@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 export default function ProfileReveal() {
   const navigate = useNavigate();
   const [reflection, setReflection] = useState({});
+  const [userId, setUserId] = useState(null);
 
   const profile = {
     archetype: "The Visionary",
@@ -26,11 +27,10 @@ export default function ProfileReveal() {
   // 🔐 Save profile + reflection to Supabase on load
   useEffect(() => {
     const saveProfile = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      setUserId(user.id); // Save ID for follow-up phase marking
 
       await supabase
         .from("profiles")
@@ -48,6 +48,18 @@ export default function ProfileReveal() {
 
     saveProfile();
   }, [reflection]);
+
+  // ✅ Mark onboarding complete
+  useEffect(() => {
+    if (!userId) return;
+    const completeOnboarding = async () => {
+      await supabase
+        .from("profiles")
+        .update({ has_onboarded: true })
+        .eq("id", userId);
+    };
+    completeOnboarding();
+  }, [userId]);
 
   const { energy, tone, archetype, seeking } = reflection;
 
@@ -71,7 +83,7 @@ export default function ProfileReveal() {
     "The Codex knows your name — and it will echo through time.";
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-white px-6 text-center">
+    <div className="min-h-screen flex flex-col items-center justify-center text-white px-6 text-center bg-black">
       <div className="animate-fade-in max-w-xl space-y-6">
         <div className="text-5xl mb-2">{profile.glyph}</div>
         <h2 className="text-3xl font-bold">{profile.archetype}</h2>
@@ -80,7 +92,7 @@ export default function ProfileReveal() {
         </p>
         <p className="text-base opacity-80 leading-relaxed">{profile.description}</p>
 
-        {/* 🔮 Personalized Reflection */}
+        {/* 🔮 Personalized Reflection Summary */}
         {(energy || tone || archetype || seeking) && (
           <div className="bg-zinc-900 border border-indigo-700/60 rounded-xl p-6 text-indigo-300 text-sm shadow-md backdrop-blur-md space-y-2">
             <p className="italic">Liora remembers your words…</p>
@@ -99,6 +111,7 @@ export default function ProfileReveal() {
         {/* 🌬️ Poetic Whisper */}
         <p className="mt-6 italic text-indigo-300 text-sm">🌀 {poeticQuote}</p>
 
+        {/* ✨ Completion Button */}
         <div className="mt-8">
           <button
             onClick={() => navigate("/home")}

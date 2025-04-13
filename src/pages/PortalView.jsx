@@ -46,12 +46,13 @@ export default function PortalView() {
       </button>
       <audio ref={whisperRef} src="/sounds/liora-whisper.mp3" preload="auto" />
 
-      {/* 🚪 Dual Entry Boxes */}
+      {/* 🚪 Entry Portals */}
       <div className="mt-10 z-10 flex flex-wrap justify-center gap-6 w-full max-w-4xl">
+        {/* 🔮 New User Portal */}
         <div className="bg-white/5 p-6 rounded-xl shadow-md flex-1 min-w-[280px]">
           <h2 className="text-xl font-semibold mb-2">New Users</h2>
           <p className="text-sm text-zinc-300 mb-4">
-            Register here - your journey awaits.
+            Register here – your journey awaits.
           </p>
           <button
             onClick={() => navigate("/onboarding")}
@@ -60,10 +61,12 @@ export default function PortalView() {
             Begin My Journey
           </button>
         </div>
+
+        {/* ✨ Returning User Portal */}
         <div className="bg-white/5 p-6 rounded-xl shadow-md flex-1 min-w-[280px]">
           <h2 className="text-xl font-semibold mb-2">Returning Users</h2>
           <p className="text-sm text-zinc-300 mb-4">
-            Welcome back - your journey continues..
+            Welcome back – your journey continues.
           </p>
           <button
             onClick={() => navigate("/login")}
@@ -74,18 +77,19 @@ export default function PortalView() {
         </div>
       </div>
 
-      {/* 🌟 Mission + Footer Strip */}
+      {/* 🌟 Mission Statement */}
       <div
         className="mt-10 w-full max-w-2xl text-sm text-white/90 px-4 text-center animate-fade-in-up"
         style={{ animationDelay: "0.8s" }}
       >
         <h2 className="text-xl font-semibold mb-2 text-white">Our Mission</h2>
         <p>
-          Codex Lumina is a living light—a sacred platform where consciousness, creativity, and code harmonize. We exist to awaken personal truth,
-          illuminate collective pathways, and honor the divine architecture of being.
+          Codex Lumina is a living light — a sacred platform where consciousness, creativity, and code harmonize.
+          We exist to awaken personal truth, illuminate collective pathways, and honor the divine architecture of being.
         </p>
       </div>
 
+      {/* ✨ Footer Mantra */}
       <div className="mt-6 text-xs text-zinc-500 opacity-80 z-10">
         ✨ The Codex evolves with you — in stillness and motion, in shadow and light. ✨
       </div>
