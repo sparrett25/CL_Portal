@@ -1,3 +1,5 @@
+// src/App.jsx
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useUserSync } from "@/context/UserSyncContext";
 import { DevFlagProvider } from "@/context/DevFlagContext";

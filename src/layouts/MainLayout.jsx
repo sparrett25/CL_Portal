@@ -1,7 +1,9 @@
+// src/layout/MainLayout.jsx
+
 import React, { useState } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
-import { useDevFlag } from "@/context/DevFlagContext"; // ✅ Add this
+import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useUserSync } from "@/context/UserSyncContext";
+import { getDevFlag } from "@/dev/useDevFlags";
 
 const navLinks = [
   { path: "/home", label: "Home" },
@@ -14,90 +16,51 @@ const navLinks = [
 export default function MainLayout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const simulateProd = useDevFlag("simulateProd"); // ✅ Check flag
+
+  const { user, profile } = useUserSync();
+  const simulateProd = getDevFlag("simulateProd");
 
   const toggleMenu = () => setMobileOpen((prev) => !prev);
-
-  const allLinks = simulateProd
-    ? navLinks
-    : [...navLinks, { path: "/dev-test", label: "Dev Test" }]; // ✅ Inject Dev link if allowed
 
   return (
     <div className="min-h-screen bg-black text-white font-inter">
       {/* Navigation */}
-      <nav className="bg-zinc-950 px-4 sm:px-6 py-4 shadow-md flex items-center justify-between">
-        {/* Logo + Brand */}
-        <div className="flex items-center gap-2 text-indigo-400 font-bold text-xl tracking-wide">
-          <div
-            className="w-9 h-9 flex items-center justify-center rounded-xl transition-all"
-            style={{
-              background: "radial-gradient(circle at center, rgba(139,92,246,0.15), transparent 80%)",
-              boxShadow: "0 0 16px rgba(139,92,246,0.6)",
-              animation: "pulse 3s ease-in-out infinite",
-              padding: "4px"
-            }}
-          >
-            <img
-              src="/logo-sigil-transparent.png"
-              alt="Codex Sigil"
-              className="w-full h-full object-contain"
-              style={{ borderRadius: "0.5rem" }}
-            />
-          </div>
-          Codex Lumina
-        </div>
+      <nav className="flex justify-between items-center p-4 border-b border-indigo-900">
+        <div className="text-xl font-bold text-indigo-400">Codex Lumina</div>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex space-x-6 text-sm">
-          {allLinks.map((link) => (
+        <div className="hidden md:flex gap-6">
+          {navLinks.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
               className={({ isActive }) =>
-                `hover:text-white ${
-                  isActive
-                    ? "text-white underline underline-offset-4"
-                    : "text-indigo-300"
-                }`
+                isActive
+                  ? "text-indigo-300 font-semibold"
+                  : "text-indigo-400 hover:text-indigo-200"
               }
             >
               {link.label}
             </NavLink>
           ))}
-        </div>
 
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <button onClick={toggleMenu} className="text-indigo-300">
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {/* 🔧 Dev Console link for Flamekeeper */}
+          {!simulateProd && profile?.role === "flamekeeper" && (
+            <NavLink
+              to="/dev-test"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-yellow-400 font-semibold"
+                  : "text-yellow-300 hover:text-yellow-200"
+              }
+            >
+              Dev Console
+            </NavLink>
+          )}
         </div>
       </nav>
 
-      {/* Mobile Nav Dropdown */}
-      {mobileOpen && (
-        <div className="bg-zinc-900 border-t border-zinc-800 px-4 py-4 md:hidden">
-          <div className="flex flex-col gap-3 text-sm">
-            {allLinks.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) =>
-                  `hover:text-white ${
-                    isActive ? "text-white underline" : "text-indigo-300"
-                  }`
-                }
-                onClick={() => setMobileOpen(false)}
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Main Content Area */}
-      <main className="px-4 sm:px-6 py-6">
+      {/* Route content */}
+      <main className="p-4">
         <Outlet />
       </main>
     </div>

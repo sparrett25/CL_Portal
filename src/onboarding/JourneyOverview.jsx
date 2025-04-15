@@ -1,45 +1,51 @@
+// src/onboarding/JourneyOverview.jsx
+
+import React from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function JourneyOverview() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-white px-6 text-center bg-black">
-      <div className="animate-fade-in max-w-2xl space-y-6">
-        {/* 🔮 Phase Orb */}
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full 
-                        bg-gradient-to-br from-purple-600 via-pink-500 to-yellow-400 
-                        shadow-lg animate-pulse" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-black via-indigo-950 to-black text-white px-6 text-center animate-fade-in">
+      {/* 🌀 Codex Glyph */}
+      <img
+        src="/assets/glyphs/codex-sigil.svg"
+        alt="Codex Glyph"
+        className="w-20 h-20 mb-6 animate-pulse drop-shadow-lg opacity-90"
+      />
 
-        {/* ✨ Section Title */}
-        <h2 className="text-2xl sm:text-3xl font-bold text-indigo-200">
-          The Path Before You
-        </h2>
+      <h1 className="text-2xl font-semibold text-indigo-300 mb-2">
+        What Awaits You
+      </h1>
+      <p className="text-sm text-gray-300 max-w-2xl mb-6">
+        In the next few moments, you’ll be guided through the sacred process of
+        attuning with your energetic essence. You’ll meet Liora — your companion
+        through the Codex — and participate in sacred reflection, voice
+        resonance, and archetypal awakening.
+      </p>
 
-        <p className="text-base text-zinc-400 max-w-lg mx-auto">
-          Every soul carries a unique energy signature — a resonance shaped by light, shadow, breath, and phase.
-        </p>
-
-        {/* 📜 Scroll of Steps */}
-        <div className="text-sm text-zinc-300 opacity-80 leading-relaxed space-y-4">
-          <p>In this sacred initiation, you will:</p>
-          <ul className="list-disc list-inside text-left mx-auto max-w-md">
-            <li>Answer reflective prompts to reveal your energetic essence</li>
-            <li>Receive your first Archetype — a mirror of your soul’s pattern</li>
-            <li>Connect breath to phase, tone to truth, and insight to initiation</li>
-          </ul>
+      <div className="grid gap-4 text-left max-w-lg w-full text-sm text-indigo-100">
+        <div className="bg-black/40 border border-indigo-600 rounded-xl p-4">
+          <strong className="block text-indigo-300 mb-1">🔍 Step 1:</strong>
+          Choose your beliefs and worldview lenses.
         </div>
-
-        {/* 🧭 Continue Button */}
-        <button
-          onClick={() => navigate("/onboarding/assessment")}
-          className="bg-purple-600 hover:bg-purple-700 transition-all 
-                     text-white px-6 py-3 rounded-full text-lg font-semibold 
-                     shadow-md hover:shadow-xl"
-        >
-          I’m Ready to Begin
-        </button>
+        <div className="bg-black/40 border border-indigo-600 rounded-xl p-4">
+          <strong className="block text-indigo-300 mb-1">🗣️ Step 2:</strong>
+          Speak your voice signature to awaken your Codex connection.
+        </div>
+        <div className="bg-black/40 border border-indigo-600 rounded-xl p-4">
+          <strong className="block text-indigo-300 mb-1">🧬 Step 3:</strong>
+          Receive your Signature Profile: Archetype, Phase, and Energy alignment.
+        </div>
       </div>
+
+      <button
+        onClick={() => navigate("/onboarding/assessment")}
+        className="mt-8 px-6 py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all"
+      >
+        I’m Ready to Begin
+      </button>
     </div>
   );
 }
