@@ -1,34 +1,41 @@
-// src/onboarding/VoiceCaptureRitual.jsx
-
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
+import { useUserSync } from "@/context/UserSyncContext";
 
 export default function VoiceCaptureRitual() {
   const [recording, setRecording] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const audioChunks = useRef([]);
   const navigate = useNavigate();
+  const { user, refetchProfile } = useUserSync();
 
   const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream);
-    setRecording(true);
-    audioChunks.current = [];
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      setRecording(true);
+      audioChunks.current = [];
 
-    recorder.ondataavailable = (e) => {
-      audioChunks.current.push(e.data);
-    };
+      recorder.ondataavailable = (e) => {
+        audioChunks.current.push(e.data);
+      };
 
-    recorder.onstop = () => {
-      const blob = new Blob(audioChunks.current, { type: "audio/webm" });
-      const url = URL.createObjectURL(blob);
-      setAudioURL(url);
-      setRecording(false);
-    };
+      recorder.onstop = () => {
+        const blob = new Blob(audioChunks.current, { type: "audio/webm" });
+        const url = URL.createObjectURL(blob);
+        setAudioURL(url);
+        setRecording(false);
+        handleUpload(blob);
+      };
 
-    recorder.start();
-    setMediaRecorder(recorder);
+      recorder.start();
+      setMediaRecorder(recorder);
+    } catch (err) {
+      console.error("🎤 Microphone access denied or error:", err);
+    }
   };
 
   const stopRecording = () => {
@@ -37,57 +44,95 @@ export default function VoiceCaptureRitual() {
     }
   };
 
-  const handleContinue = () => {
-    navigate("/onboarding/reveal");
+  const resetRecording = () => {
+    setAudioURL(null);
+    setMediaRecorder(null);
+    setRecording(false);
+    audioChunks.current = [];
+  };
+
+  const handleUpload = async (blob) => {
+    if (!user) return;
+    setUploading(true);
+
+    const filePath = `voices/${user.id}.webm`;
+    const { data, error } = await supabase.storage
+      .from("voice-recordings")
+      .upload(filePath, blob, { upsert: true, contentType: "audio/webm" });
+
+    if (error) {
+      console.error("❌ Upload failed:", error.message);
+      setUploading(false);
+      return;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from("voice-recordings")
+      .getPublicUrl(filePath);
+
+    const voiceUrl = publicUrlData?.publicUrl;
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ voice_signature_url: voiceUrl })
+      .eq("id", user.id);
+
+    if (updateError) {
+      console.error("❌ Profile update failed:", updateError.message);
+      setUploading(false);
+      return;
+    }
+
+    await refetchProfile();
+    setUploading(false);
+    navigate("/onboarding/profile-reveal");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-indigo-950 to-black text-white flex flex-col items-center justify-center px-6 text-center animate-fade-in">
-      <img
-        src="/assets/glyphs/codex-sigil.svg"
-        alt="Voice Sigil"
-        className="w-20 h-20 mb-6 animate-pulse drop-shadow-xl opacity-80"
-      />
-
-      <h2 className="text-2xl font-semibold text-indigo-300 mb-2">Speak the Awakening Phrase</h2>
-      <p className="text-sm text-gray-400 mb-6 max-w-xl">
-        When you are ready, speak this sacred phrase aloud. It will become your energetic key:
+    <div className="min-h-screen flex flex-col items-center justify-center text-center text-white bg-black px-6 py-12">
+      <h1 className="text-3xl font-bold mb-4 text-indigo-300">🕊️ Voice Capture Ritual</h1>
+      <p className="mb-6 max-w-xl text-sm text-white/80 leading-relaxed">
+        Please speak the sacred phrase: <br />
+        <em className="text-indigo-200">
+          “I am the breath between stars, the light within shadow, the spark of what is becoming. I awaken now. I am ready.”
+        </em>
       </p>
 
-      <div className="bg-black/30 border border-indigo-600 text-indigo-100 rounded-xl px-6 py-4 mb-6 max-w-lg">
-        <p className="italic text-lg">
-          “I am the breath between stars, the light within shadow, the spark of what is becoming. I awaken now. I am ready.”
-        </p>
-      </div>
-
-      {!recording && !audioURL && (
-        <button
-          onClick={startRecording}
-          className="px-6 py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all"
-        >
-          Begin Recording
-        </button>
+      {uploading && (
+        <div className="text-indigo-400 animate-pulse">Uploading voice to the Codex...</div>
       )}
 
-      {recording && (
-        <button
-          onClick={stopRecording}
-          className="px-6 py-3 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold transition-all"
-        >
-          Stop Recording
-        </button>
-      )}
-
-      {audioURL && (
-        <div className="mt-6 space-y-4">
-          <audio controls src={audioURL} className="w-full max-w-md" />
+      {audioURL && !uploading ? (
+        <div className="flex flex-col items-center space-y-4">
+          <audio controls src={audioURL} className="w-64" />
           <button
-            onClick={handleContinue}
-            className="px-6 py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all"
+            onClick={resetRecording}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl"
           >
-            Continue
+            Retry
           </button>
         </div>
+      ) : (
+        !uploading && (
+          <div className="flex flex-col items-center space-y-4">
+            {!recording && (
+              <button
+                onClick={startRecording}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl"
+              >
+                Start Recording
+              </button>
+            )}
+            {recording && (
+              <button
+                onClick={stopRecording}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl"
+              >
+                Stop & Save
+              </button>
+            )}
+          </div>
+        )
       )}
     </div>
   );

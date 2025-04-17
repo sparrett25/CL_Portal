@@ -1,41 +1,86 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";  // Correctly import your Supabase instance
+import { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useNavigate } from 'react-router-dom';
 
 const UserSyncContext = createContext();
 
 export function UserSyncProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(undefined);
   const [loading, setLoading] = useState(true);
+  const [codexKey, setCodexKey] = useState(null);
+  const [codexReflection, setCodexReflection] = useState(null); // 🆕 Added for dev-test and whisper
 
-  useEffect(() => {
-    const fetchSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session ? session.user : null);
+  const navigate = useNavigate();
+
+  // 🔁 Extracted refetch logic
+  const refetchProfile = async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const currentUser = sessionData?.session?.user;
+
+    if (!currentUser) {
+      setUser(null);
+      setProfile(null);
       setLoading(false);
-    };
+      return;
+    }
 
-    fetchSession();
+    setUser(currentUser);
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session ? session.user : null);
-      setLoading(false);
-    });
+    const { data: profileData, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', currentUser.id)
+      .single();
 
-    return () => {
-      if (authListener?.unsubscribe) {
-        authListener.unsubscribe();
-      }
-    };
-  }, []);
+    if (error) {
+      console.error('🔥 Profile fetch failed:', error.message);
+      setProfile(null);
+    } else {
+      setProfile(profileData || null);
+    }
 
-  // Sign out function
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
+    setLoading(false);
   };
 
+  useEffect(() => {
+    refetchProfile();
+
+    // 🧠 Load codexReflection from session storage (for tone testing)
+    const stored = sessionStorage.getItem('codexReflection');
+    if (stored) {
+      try {
+        setCodexReflection(JSON.parse(stored));
+      } catch (e) {
+        console.warn('⚠️ Failed to parse codexReflection from session');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!loading && user && profile === null) {
+      console.warn('⚠️ Authenticated user has no profile — resetting session.');
+      supabase.auth.signOut();
+      sessionStorage.clear();
+      localStorage.clear();
+      window.location.href = '/portal';
+    }
+  }, [user, profile, loading]);
+
+  const value = {
+    user,
+    profile,
+    loading,
+    codexKey,
+    setCodexKey,
+    codexReflection, // 🧠 now available everywhere
+    refetchProfile,
+  };
+
+  console.log('🧠 Rendering UserSyncContext.Provider', value);
+
   return (
-    <UserSyncContext.Provider value={{ user, loading, signOut }}>
+    <UserSyncContext.Provider value={value}>
       {children}
     </UserSyncContext.Provider>
   );

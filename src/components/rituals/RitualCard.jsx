@@ -1,8 +1,11 @@
 import React from "react";
 
-export default function RitualCard({ ritual }) {
+export default function RitualCard({ ritual, onClick }) {
   return (
-    <div className="bg-black/90 rounded-2xl overflow-hidden shadow-lg border border-indigo-500 hover:shadow-xl transition-all duration-300">
+    <div
+      onClick={onClick}
+      className="cursor-pointer bg-black/90 rounded-2xl overflow-hidden shadow-lg border border-indigo-500 hover:shadow-xl transition-all duration-300"
+    >
       <img
         src={`/assets/rituals/cards/${ritual.filename}`}
         alt={ritual.title}

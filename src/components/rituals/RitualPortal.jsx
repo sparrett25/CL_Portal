@@ -1,33 +1,52 @@
-import React from "react";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import RitualPlayer from "./RitualPlayer";
 
-export default function RitualPortal({ title, description, image, onEnter }) {
+export default function RitualPortal({ ritual, onClose }) {
+  if (!ritual) return null;
+  const [entered, setEntered] = useState(false);
+
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="relative w-full max-w-md mx-auto overflow-hidden rounded-2xl shadow-xl border border-white/10 bg-gradient-to-br from-black via-zinc-900 to-black"
-    >
-      <div className="relative h-64 w-full">
-        <img
-          src={image}
-          alt="Ritual Portal"
-          className="object-cover w-full h-full opacity-90"
-        />
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center">
-          <div className="text-center px-4">
-            <h2 className="text-2xl font-bold text-lime-300 drop-shadow">{title}</h2>
-            <p className="text-zinc-300 mt-2 text-sm">{description}</p>
-            <button
-              onClick={onEnter}
-              className="mt-4 px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg transition"
-            >
-              Enter Ritual
-            </button>
-          </div>
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center px-6 py-12">
+      {!entered ? (
+        <div className="bg-zinc-900 rounded-xl shadow-xl border border-indigo-700 p-8 max-w-2xl w-full text-white text-center animate-fadeIn">
+          <h2 className="text-xl font-bold text-indigo-300 mb-4 uppercase tracking-wide">
+            {ritual.title}
+          </h2>
+
+          {ritual.image && (
+            <img
+              src={`/assets/rituals/cards/${ritual.filename}`}
+              alt={ritual.title}
+              className="w-full h-64 object-cover object-center rounded-md border border-indigo-500 mb-4"
+            />
+          )}
+
+          <p className="text-indigo-200 italic mb-6 text-lg max-w-lg mx-auto">
+            “{ritual.description}”
+          </p>
+
+          <button
+            onClick={() => setEntered(true)}
+            className="mt-2 px-6 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition"
+          >
+            Enter Ritual
+          </button>
         </div>
-      </div>
-    </motion.div>
+      ) : (
+        <>
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 z-50 text-white text-xl bg-zinc-800 border border-zinc-600 rounded-full w-10 h-10 flex items-center justify-center hover:bg-red-600 transition"
+          >
+            ×
+          </button>
+          <RitualPlayer
+            title={ritual.title}
+            energy={ritual.energy || "Neutral"}
+            onComplete={onClose}
+          />
+        </>
+      )}
+    </div>
   );
 }

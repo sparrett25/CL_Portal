@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import DailyAlignmentPanel from "@/components/DailyAlignmentPanel"; // ✅ Panel: light/dark reflection
+import DailyAlignmentPanel from "@/components/home/DailyAlignmentPanel";
 
 export default function HomePage() {
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -17,55 +18,55 @@ export default function HomePage() {
         .single();
 
       if (error) {
-        console.error("Failed to fetch profile:", error);
+        console.error("❌ Failed to fetch profile:", error);
         return;
       }
 
       if (data) setProfile(data);
+      setLoading(false);
     };
 
     fetchProfile();
   }, []);
 
-  if (!profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Loading your Codex...
-      </div>
-    );
-  }
-
-  const { archetype, energy, phase } = profile;
-
   const energyGlow = {
-    Light: "from-yellow-300 via-pink-300 to-purple-500",
-    Neutral: "from-gray-600 via-blue-400 to-indigo-700",
-    Dark: "from-indigo-900 via-purple-700 to-black",
+    Light: "from-amber-300 via-rose-400 to-fuchsia-600",
+    Neutral: "from-gray-800 via-sky-500 to-indigo-600",
+    Dark: "from-indigo-950 via-purple-800 to-black",
   };
 
-  const glow = energyGlow[energy] || "from-zinc-600 to-zinc-900";
+  const glow = profile?.energy ? energyGlow[profile.energy] : "from-zinc-800 to-black";
 
   return (
     <div className={`min-h-screen bg-gradient-to-br ${glow} text-white px-6 py-10`}>
-      <div className="max-w-3xl mx-auto text-center animate-fade-in">
-        <h1 className="text-4xl font-bold mb-2 tracking-wide">
-          Welcome, {archetype}
-        </h1>
-        <p className="text-sm uppercase tracking-widest text-indigo-300">
-          {energy} Energy • {phase} Phase
-        </p>
+      <div className="max-w-3xl mx-auto text-center animate-fadeIn">
+        {loading || !profile ? (
+          <div className="text-xl opacity-80">Loading your Codex...</div>
+        ) : (
+          <>
+            <h1 className="text-4xl font-bold mb-2 tracking-wide drop-shadow-md">
+              Welcome, {profile.archetype}
+            </h1>
+            <p className="text-sm uppercase tracking-widest text-indigo-300">
+              {profile.energy} Energy • {profile.phase} Phase
+            </p>
 
-        <p className="mt-6 text-base opacity-80 leading-relaxed">
-          Liora whispers: <em>"You have arrived at the threshold of your own becoming.  
-          This space is alive with your reflection. Let’s begin."</em>
-        </p>
+            <p className="mt-6 text-base opacity-90 leading-relaxed">
+              Liora whispers: <em>
+                “You have arrived at the threshold of your becoming.  
+                This place echoes with your sacred rhythm. Let us begin.”
+              </em>
+            </p>
 
-        {/* 🔮 Living Daily Alignment Panel */}
-        <DailyAlignmentPanel
-          archetype={archetype}
-          energy={energy}
-          phase={phase}
-        />
+            <div className="mt-10">
+              <DailyAlignmentPanel
+                archetype={profile.archetype}
+                energy={profile.energy}
+                phase={profile.phase}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

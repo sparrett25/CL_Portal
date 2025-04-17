@@ -5,7 +5,7 @@ export default function BreathPractice({ energy = "Neutral" }) {
   const [count, setCount] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isRunning, setIsRunning] = useState(true);
-  const [audioEnabled, setAudioEnabled] = useState(true); // 🔊 NEW toggle
+  const [audioEnabled, setAudioEnabled] = useState(true);
 
   const intervalRef = useRef(null);
   const timerRef = useRef(null);
@@ -14,7 +14,7 @@ export default function BreathPractice({ energy = "Neutral" }) {
   const durations = [4000, 2000, 4000, 2000];
 
   const playSound = (filename) => {
-    if (!audioEnabled) return; // 🔇 respect user preference
+    if (!audioEnabled) return;
     const audio = new Audio(`/sounds/${filename}`);
     audio.volume = 0.4;
     audio.play().catch(() => {});

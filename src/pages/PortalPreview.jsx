@@ -1,86 +1,49 @@
-// src/pages/PortalPreview.jsx
-
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
-import PortalLayout from "@/components/layout/PortalLayout";
+import Lottie from "lottie-react";
+import glyphAnimation from "@/assets/lottie/codex-glyph.json"; // 🔁 Replace with your own animation file
 
-export default function PortalPreview() {
-  const [key, setKey] = useState("");
-  const [unlocked, setUnlocked] = useState(false);
+export default function PortalView() {
   const navigate = useNavigate();
 
-  const handleSubmit = async () => {
-    if (!key) return;
-
-    // ✅ Fixed table name: invite_keys
-    const { data, error } = await supabase
-      .from("invite_keys")
-      .select("*")
-      .eq("key", key)
-      .single();
-
-    if (data && (data.uses_left === null || data.uses_left > 0)) {
-      try {
-        new Audio("/assets/audio/veil-entry.mp3").play();
-      } catch (err) {
-        console.warn("Audio could not play:", err);
-      }
-
-      setUnlocked(true);
-
-      setTimeout(async () => {
-        if (data.uses_left !== null) {
-          await supabase
-            .from("invite_keys")
-            .update({ uses_left: data.uses_left - 1 })
-            .eq("id", data.id);
-        }
-
-        navigate("/create-account");
-      }, 1200);
-    } else {
-      alert("Invalid or inactive Codex Key.");
-    }
-  };
-
   return (
-    <PortalLayout>
-      {/* 🌀 Floating Codex Glyph */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <img
-          src="/assets/glyphs/codex-sigil.svg"
-          alt="Codex Glyph"
-          className="w-48 h-48 opacity-10 animate-spin-slow"
-        />
+    <div className="relative min-h-screen bg-black text-white flex items-center justify-center overflow-hidden">
+      {/* 🌫 Veil Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-indigo-900 to-black opacity-80 pointer-events-none z-0" />
+
+      {/* 🌀 Animated Glyph */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[60%] w-64 h-64 z-10 opacity-90 drop-shadow-2xl animate-pulse-slow">
+        <Lottie animationData={glyphAnimation} loop={true} />
       </div>
 
-      {/* 🌫️ Key Input Block with Veil Logic */}
-      <div
-        className={`transition-opacity duration-1000 ease-out ${
-          unlocked ? "opacity-0 blur-sm" : "opacity-100"
-        } w-full z-10`}
-      >
-        <div className="space-y-4 text-center">
-          <label className="block text-lg font-semibold text-white">
-            Enter Your Codex Key
-          </label>
-          <input
-            type="text"
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-            placeholder="EX: INITIATE-777"
-            className="w-full px-4 py-3 rounded-xl bg-white/90 border border-indigo-400 text-indigo-800 placeholder:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+      {/* 🔓 Entry Options */}
+      <div className="z-20 relative text-center space-y-6 max-w-md p-8 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 shadow-lg">
+        <h1 className="text-3xl font-bold text-indigo-300">Enter Codex Lumina</h1>
+        <p className="text-sm text-zinc-400">
+          Choose your path. All who seek, begin through the Gate.
+        </p>
+
+        <div className="space-y-4 pt-4">
           <button
-            type="button"
-            onClick={handleSubmit}
-            className="w-full px-6 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all"
+            onClick={() => navigate("/key-entry")}
+            className="w-full py-3 rounded-full bg-green-600 hover:bg-green-700 transition-all shadow-md"
           >
-            Submit
+            🔑 Enter with a Codex Key
+          </button>
+          <button
+            onClick={() => navigate("/sign-in")}
+            className="w-full py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 transition-all shadow-md"
+          >
+            🔐 Sign In
+          </button>
+          <button
+            onClick={() => navigate("/create-account")}
+            className="w-full py-3 rounded-full bg-purple-600 hover:bg-purple-700 transition-all shadow-md"
+          >
+            ✨ Create Account
           </button>
         </div>
       </div>
-    </PortalLayout>
+    </div>
   );
 }

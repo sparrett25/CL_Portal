@@ -1,68 +1,89 @@
-import React, { useState } from "react";
-import CodexKeyEntry from "@/components/Auth/CodexKeyEntry";
-import SignatureStep from "@/components/Onboarding/SignatureStep";
-import VoiceCaptureRitual from "@/components/Onboarding/VoiceCaptureRitual";
-import LottieSigilAnimation from "@/components/Onboarding/LottieSigilAnimation";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import SignatureStep from "./SignatureStep";
+import VoiceCaptureStep from "./VoiceCaptureStep";
+import CodexKeyEntry from "./CodexKeyEntry";
+import LottieSigilAnimation from "@/components/visual/LottieSigilAnimation";
+import { useNavigate } from "react-router-dom";
+import { useUserSync } from "@/context/UserSyncContext";
 
-export default function OnboardingPage() {
-  const [stage, setStage] = useState("codexKey"); // stages: codexKey → signature → voice → complete
+export default function OnboardingFlow() {
+  const [stage, setStage] = useState("codexKey");
+  const [codexKey, setCodexKey] = useState(null);
   const [userEnergy, setUserEnergy] = useState("Neutral");
   const [voiceBlob, setVoiceBlob] = useState(null);
 
-  const handleCodexKeySubmit = (key) => {
-    // You may validate the key here with Supabase or preset
-    if (key === "LUMINA-KEY-2025") {
-      setStage("signature");
-    } else {
-      alert("Invalid Codex Key. Please try again.");
-    }
-  };
+  const navigate = useNavigate();
+  const { refetchProfile } = useUserSync();
 
-  const handleSignatureComplete = (profile) => {
-    setUserEnergy(profile.energy);
+  useEffect(() => {
+    const storedKey = sessionStorage.getItem("codexKey");
+    if (storedKey) {
+      setCodexKey(storedKey);
+      setStage("signature");
+    }
+  }, []);
+
+  const handleSignatureComplete = (energy) => {
+    setUserEnergy(energy);
     setStage("voice");
   };
 
-  const handleVoiceComplete = (blob) => {
-    setVoiceBlob(blob); // optional: upload to Supabase
+  const handleVoiceComplete = async (blob) => {
+    setVoiceBlob(blob);
     setStage("complete");
 
-    setTimeout(() => {
-      window.location.href = "/home";
-    }, 2500); // Transition delay for effect
+    // ✅ Mark onboarding as complete
+    const { data: sessionData } = await supabase.auth.getSession();
+    const userId = sessionData?.session?.user?.id;
+
+    if (userId) {
+      await supabase
+        .from("profiles")
+        .update({ has_onboarded: true })
+        .eq("id", userId);
+
+      await supabase.auth.updateUser({
+        data: { has_onboarded: true }
+      });
+    }
+
+    // ✅ Refetch profile and navigate to home
+    setTimeout(async () => {
+      await refetchProfile();
+      navigate("/home");
+    }, 2500);
   };
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-10 flex items-center justify-center">
-      <div className="w-full max-w-2xl space-y-10">
-        {stage === "codexKey" && <CodexKeyEntry onSubmit={handleCodexKeySubmit} />}
+    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
+      {stage === "codexKey" && (
+        <CodexKeyEntry
+          onSubmit={(key) => {
+            setCodexKey(key);
+            sessionStorage.setItem("codexKey", key);
+            setStage("signature");
+          }}
+        />
+      )}
 
-        {stage === "signature" && (
-          <>
-            <SignatureStep onComplete={handleSignatureComplete} />
-            <div className="mt-6 flex justify-center">
-              <LottieSigilAnimation energy={userEnergy} />
-            </div>
-          </>
-        )}
+      {stage === "signature" && (
+        <SignatureStep energy={userEnergy} onComplete={handleSignatureComplete} />
+      )}
 
-        {stage === "voice" && (
-          <>
-            <VoiceCaptureRitual onComplete={handleVoiceComplete} />
-            <div className="mt-6 flex justify-center">
-              <LottieSigilAnimation energy={userEnergy} />
-            </div>
-          </>
-        )}
+      {stage === "voice" && (
+        <VoiceCaptureStep energy={userEnergy} onComplete={handleVoiceComplete} />
+      )}
 
-        {stage === "complete" && (
-          <div className="text-center space-y-4">
-            <LottieSigilAnimation energy={userEnergy} />
-            <h2 className="text-2xl font-bold text-lime-300">Welcome, Luminary</h2>
-            <p className="text-zinc-400">Your Codex Signature has been recorded. Preparing your journey...</p>
-          </div>
-        )}
-      </div>
+      {stage === "complete" && (
+        <div className="text-center space-y-4">
+          <LottieSigilAnimation energy={userEnergy} />
+          <h2 className="text-2xl font-bold text-lime-300">Welcome, Luminary</h2>
+          <p className="text-zinc-400">
+            Your Codex Signature has been recorded. Preparing your journey...
+          </p>
+        </div>
+      )}
     </div>
   );
 }

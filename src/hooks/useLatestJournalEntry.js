@@ -2,10 +2,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+/**
+ * Fetches the most recent journal entry for a given user.
+ * Used to reflect tone, trigger Liora whispers, or track ritual cycles.
+ */
 export function useLatestJournalEntry(userId) {
   const [entry, setEntry] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // Optional: track error
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -20,14 +24,14 @@ export function useLatestJournalEntry(userId) {
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(1)
-        .maybeSingle(); // ✅ Avoids 406 if no entry
+        .maybeSingle(); // ✅ Avoids 406 on empty
 
       if (error) {
-        console.error("Failed to load journal entry:", error);
+        console.error("🛑 Failed to fetch latest journal entry:", error.message);
         setError(error);
       }
 
-      setEntry(data || null); // ✅ Safely handles empty result
+      setEntry(data || null);
       setLoading(false);
     };
 

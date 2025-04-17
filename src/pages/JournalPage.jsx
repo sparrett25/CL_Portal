@@ -1,210 +1,126 @@
-import { useEffect, useState, useRef } from "react";
-import { useUserSync } from "@/context/UserSyncContext";
-import {
-  getJournalEntries,
-  insertJournalEntry,
-  updateJournalEntry,
-} from "@/services/journalService";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import PageFrame from "@/components/layout/PageFrame";
-import JournalList from "@/components/JournalList";
-import JournalCalendarMap from "@/components/JournalCalendarMap";
-import LioraWhisperCard from "@/components/liora/LioraWhisperCard";
+import JournalList from "@/components/journal/JournalList";
+import JournalCalendarMap from "@/components/journal/JournalCalendarMap";
+import LioraWhisperCard from "@/components/journal/LioraWhisperCard";
+import { supabase } from "@/lib/supabase";
 
 export default function JournalPage() {
-  const { user } = useUserSync();
   const [entries, setEntries] = useState([]);
-  const [newEntry, setNewEntry] = useState("");
-  const [editingEntryId, setEditingEntryId] = useState(null);
-  const [toneEcho, setToneEcho] = useState("");
-  const [toneTags, setToneTags] = useState([]);
-  const [showWhisper, setShowWhisper] = useState(false);
-  const [filterDays, setFilterDays] = useState(7);
-  const [showComposer, setShowComposer] = useState(true);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [showCalendar, setShowCalendar] = useState(false);
-
-  const chartRef = useRef(null);
+  const [sortBy, setSortBy] = useState("Newest");
+  const [reflection, setReflection] = useState("");
+  const [whisper, setWhisper] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!user?.id) return;
-    getJournalEntries(user.id).then((data) => setEntries(data));
-  }, [user]);
-
-  useEffect(() => {
-    // Priority: dailyReflection > codexReflection > unsaved draft
-    const daily = sessionStorage.getItem("dailyReflection");
-    const codex = sessionStorage.getItem("codexReflection");
-    const draft = localStorage.getItem("unsavedJournalEntry");
-
-    if (daily) {
-      const { date, archetype, energy, phase, affirmation, ritual, whisper } =
-        JSON.parse(daily);
-
-      const prefilled = `✨ **Daily Alignment: ${date}**
-🔹 **Archetype:** ${archetype}
-🔹 **Energy:** ${energy}
-🔹 **Phase:** ${phase}
-
-💬 *Affirmation:* "${affirmation}"
-🌀 *Ritual Prompt:* ${ritual}
-🌬️ *Liora Whisper:* "${whisper}"
-
-📝 Reflection: `;
-
-      setNewEntry(prefilled);
-      sessionStorage.removeItem("dailyReflection");
-    } else if (codex) {
-      const { energy, tone, archetype, seeking } = JSON.parse(codex);
-
-      const prefilled = `✨ **Your Sacred Reflection**
-🔹 **Energy Present:** ${energy || ""}
-🔹 **Tone:** ${tone || ""}
-🔹 **Archetype Resonance:** ${archetype || ""}
-🔹 **Seeking:** "${seeking || ""}"
-
-📝 Reflection: `;
-
-      setNewEntry(prefilled);
-    } else if (draft) {
-      setNewEntry(draft);
-    }
-
-    setShowComposer(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    fetchEntries();
   }, []);
 
-  const handleSaveEntry = async () => {
-    if (!newEntry.trim()) return;
-    const tone = generateToneEcho(newEntry);
+  const fetchEntries = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
+    if (!user) return;
 
-    if (editingEntryId) {
-      await updateJournalEntry(editingEntryId, newEntry);
-    } else {
-      await insertJournalEntry(user.id, newEntry, "user", tone.tags);
+    const { data, error } = await supabase
+      .from("journal_entries")
+      .select("id, content, created_at, tone")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setEntries(data);
     }
-
-    setToneEcho(tone.message);
-    setToneTags(tone.tags);
-    setNewEntry("");
-    setEditingEntryId(null);
-    setShowComposer(true);
-
-    // 🔁 Clear saved draft
-    localStorage.removeItem("unsavedJournalEntry");
-
-    // 🔮 Show whisper only after the first journal of the day
-    const refreshed = await getJournalEntries(user.id);
-    setEntries(refreshed);
-
-    const today = new Date().toDateString();
-    const firstToday = refreshed.filter(
-      (entry) =>
-        new Date(entry.created_at).toDateString() === today
-    );
-
-    if (firstToday.length === 1) {
-      setShowWhisper(true);
-    }
-
-    setTimeout(() => {
-      chartRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 200);
   };
 
-  const generateToneEcho = (text) => {
-    const words = text.toLowerCase();
-    const tags = [];
-    let message =
-      "Your reflection carries presence. A step toward deeper awareness.";
+  const handleSave = async () => {
+    if (!reflection.trim()) return;
+    setSubmitting(true);
 
-    if (words.includes("joy") || words.includes("peace")) {
-      message = "There is a calm radiance in your energy today.";
-      tags.push("joy", "peace");
-    }
-    if (words.includes("fear") || words.includes("conflict")) {
-      message = "Liora senses storm winds beneath the words. Breathe.";
-      tags.push("fear", "conflict");
-    }
-    if (words.includes("clarity") || words.includes("vision")) {
-      message = "Your message sharpens like light through crystal.";
-      tags.push("clarity", "vision");
+    const tone = "Neutral"; // Placeholder tone logic for now
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const user = session?.user;
+    if (!user) {
+      setSubmitting(false);
+      return;
     }
 
-    return { message, tags };
+    const { error } = await supabase.from("journal_entries").insert({
+      user_id: user.id,
+      content: reflection.trim(),
+      tone,
+    });
+
+    if (!error) {
+      setReflection("");
+      setWhisper("You’ve just etched a thought into the Codex.");
+      fetchEntries();
+    }
+
+    setSubmitting(false);
   };
 
-  const recentEntries = entries.filter((entry) => {
-    const created = new Date(entry.created_at);
-    return (new Date() - created) / (1000 * 60 * 60 * 24) <= filterDays;
+  const sortedEntries = [...entries].sort((a, b) => {
+    if (sortBy === "Oldest") return new Date(a.created_at) - new Date(b.created_at);
+    if (sortBy === "Tone: Light → Dark") return (a.tone || '').localeCompare(b.tone || '');
+    if (sortBy === "Tone: Dark → Light") return (b.tone || '').localeCompare(a.tone || '');
+    return new Date(b.created_at) - new Date(a.created_at);
   });
 
-  const handleDeleteEntry = async (id) => {
-    const { deleteJournalEntry } = await import("@/services/journalService");
-    await deleteJournalEntry(id);
-    const refreshed = await getJournalEntries(user.id);
-    setEntries(refreshed);
-  };
-
-  const handleSelectDate = (selectedDate) => {
-    const filteredEntries = entries.filter(
-      (entry) =>
-        new Date(entry.created_at).toDateString() ===
-        selectedDate.toDateString()
-    );
-    setEntries(filteredEntries);
-  };
-
   return (
-    <PageFrame
-      title="✧ Daily Reflections Journal ✧"
-      subtitle="Liora is here to guide you… whispering between each word you release."
-    >
-      {showWhisper && (
-        <LioraWhisperCard toneEcho={toneEcho} toneTags={toneTags} />
-      )}
-
-      {showComposer && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-indigo-700/60 rounded-2xl shadow-xl p-8 mb-10 backdrop-blur-md"
+    <PageFrame title="Journal" subtitle="Write your reflection below and whisper it into the Codex...">
+      <div className="mb-6">
+        <textarea
+          value={reflection}
+          onChange={(e) => setReflection(e.target.value)}
+          placeholder="Let your thoughts flow..."
+          rows={6}
+          className="w-full rounded-lg p-4 text-white bg-black border border-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-zinc-400 caret-white"
+        />
+        <button
+          onClick={handleSave}
+          disabled={submitting}
+          className="mt-3 px-5 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white"
         >
-          <h2 className="text-xl font-semibold text-indigo-300 mb-4">
-            {editingEntryId ? "Edit Reflection" : "Write a New Reflection"}
-          </h2>
-          <textarea
-            className="w-full bg-zinc-950 text-indigo-100 placeholder-zinc-400 border border-indigo-600 p-4 rounded-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-500 caret-white font-mono text-sm leading-relaxed tracking-wide"
-            rows={10}
-            placeholder="Let your thoughts flow..."
-            value={newEntry}
-            onChange={(e) => {
-              const val = e.target.value;
-              setNewEntry(val);
-              localStorage.setItem("unsavedJournalEntry", val);
-            }}
-            maxLength={1000}
-          />
-          <button
-            onClick={handleSaveEntry}
-            className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md"
-          >
-            Save Entry
-          </button>
-        </motion.div>
-      )}
-
-      <div className="mb-8">
-        <JournalList entries={recentEntries} onDelete={handleDeleteEntry} />
+          Save Entry
+        </button>
+        {whisper && (
+          <div className="mt-4 text-indigo-300 italic text-sm animate-fadeInSlow">“{whisper}”</div>
+        )}
       </div>
 
-      {showCalendar && (
-        <JournalCalendarMap
-          entries={entries}
-          onSelectDate={handleSelectDate}
-        />
-      )}
+      <div className="mb-6">
+        <LioraWhisperCard />
+      </div>
+
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold text-indigo-300">Your Past Reflections</h2>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <label htmlFor="sortBy" className="text-sm text-indigo-300">Sort by:</label>
+          <select
+            id="sortBy"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-black border border-indigo-700 rounded px-3 py-1 text-white text-sm"
+          >
+            <option>Newest</option>
+            <option>Oldest</option>
+            <option>Tone: Light → Dark</option>
+            <option>Tone: Dark → Light</option>
+          </select>
+        </div>
+      </div>
+
+      <JournalList entries={sortedEntries} />
+
+      <div className="mt-10">
+        <JournalCalendarMap entries={entries} />
+      </div>
     </PageFrame>
   );
 }

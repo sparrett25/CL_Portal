@@ -1,29 +1,39 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/**/*.{html,js,jsx,ts,tsx}",
-    "./public/index.html"
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
       colors: {
-        // Custom colors for better contrast
-        zinc: {
-          900: '#111111',  // Dark background
-          700: '#2d2d2d',  // Lighter zinc for inputs and cards
-        },
-        indigo: {
-          500: '#6366F1',  // Indigo color for focus rings, etc.
-        },
-        white: '#ffffff',  // Explicit white color
+        // Optional Codex palette extensions
+        codexLight: "#fcd34d",
+        codexNeutral: "#64748b",
+        codexDark: "#1e1b4b",
       },
-      textColor: {
-        white: '#ffffff',  // Make sure white text is applied
+      keyframes: {
+        breathPulse: {
+          '0%, 100%': {
+            transform: 'scale(0.95)',
+            opacity: '0.6',
+          },
+          '50%': {
+            transform: 'scale(1.1)',
+            opacity: '1',
+          },
+        },
+        fadeIn: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
       },
-      backgroundColor: {
-        'zinc-950': '#1e1e1e', // Custom dark background color
-      }
+      animation: {
+        fadeIn: 'fadeIn 1.5s ease-in-out forwards',
+        fadeInSlow: 'fadeIn 3s ease-in-out forwards',
+        breathPulse: 'breathPulse 4s ease-in-out infinite',
+      },
     },
   },
-  darkMode: 'class',  // Enable dark mode
   plugins: [],
-}
+};

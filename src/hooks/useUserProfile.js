@@ -2,13 +2,19 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
+/**
+ * Fetches the user profile from Supabase for a given authenticated user.
+ * Commonly used when bypassing full UserSyncContext (or in SSR contexts).
+ */
 export function useUserProfile(user) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // Optional error exposure
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !user.id) {
       setLoading(false);
+      setProfile(null);
       return;
     }
 
@@ -20,15 +26,18 @@ export function useUserProfile(user) {
         .single();
 
       if (error) {
-        console.error("Error loading profile:", error);
+        console.warn("⚠️ Error loading profile:", error.message);
+        setError(error);
+        setProfile(null);
+      } else {
+        setProfile(data || null);
       }
 
-      setProfile(data || null);
       setLoading(false);
     };
 
     fetchProfile();
   }, [user]);
 
-  return { profile, loading };
+  return { profile, loading, error };
 }

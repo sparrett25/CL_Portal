@@ -1,41 +1,50 @@
 // src/components/SidebarDrawer.jsx
-import React, { useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { supabase } from "@/lib/supabase"; // ✅ Unified import
+import { useNavigate } from "react-router-dom";
 
-const avatars = ['liora1', 'liora2', 'liora3']; // Add more as needed
+const avatars = ["liora1", "liora2", "liora3"]; // 🌟 Extend with future stages if needed
 
 const SidebarDrawer = ({ profile, open, onClose }) => {
   const navigate = useNavigate();
-  const [nickname, setNickname] = useState(profile?.nickname || '');
+  const [nickname, setNickname] = useState(profile?.nickname || "");
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate('/login');
+    sessionStorage.clear();
+    navigate("/login");
   };
 
   const handleNicknameUpdate = async () => {
     if (nickname && nickname !== profile.nickname) {
-      await supabase.from('profiles').update({ nickname }).eq('id', profile.id);
+      await supabase
+        .from("profiles")
+        .update({ nickname })
+        .eq("id", profile.id);
     }
   };
 
   const handleAvatarSelect = async (avatar) => {
-    await supabase.from('profiles').update({ avatar }).eq('id', profile.id);
-    window.location.reload();
+    if (avatar !== profile.avatar) {
+      await supabase
+        .from("profiles")
+        .update({ avatar })
+        .eq("id", profile.id);
+      window.location.reload(); // 🌟 Optional: trigger visual sync
+    }
   };
 
   const handleThemeToggle = () => {
-    const current = localStorage.getItem('theme') || 'dark';
-    const next = current === 'dark' ? 'light' : 'dark';
+    const current = localStorage.getItem("theme") || "dark";
+    const next = current === "dark" ? "light" : "dark";
     document.documentElement.classList.remove(current);
     document.documentElement.classList.add(next);
-    localStorage.setItem('theme', next);
+    localStorage.setItem("theme", next);
   };
 
   const containerClasses = open
-    ? 'translate-x-0 opacity-100'
-    : 'translate-x-full opacity-0';
+    ? "translate-x-0 opacity-100"
+    : "translate-x-full opacity-0";
 
   return (
     <div
@@ -44,16 +53,23 @@ const SidebarDrawer = ({ profile, open, onClose }) => {
       <div className="absolute -left-10 top-10 w-8 h-8 animate-pulse bg-indigo-500 rounded-full blur-md"></div>
 
       <div className="p-6 flex flex-col h-full">
+        {/* 🔹 Header */}
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold text-white">My Codex</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white text-2xl"
+          >
+            &times;
+          </button>
         </div>
 
+        {/* 🔹 Profile Avatar + Nickname */}
         <div className="mt-6 flex flex-col items-center">
           <div
             className="w-20 h-20 rounded-full bg-cover bg-center shadow-lg mb-4"
             style={{
-              backgroundImage: `url(/avatars/${profile.avatar || 'liora1'}.png)`,
+              backgroundImage: `url(/avatars/${profile.avatar || "liora1"}.png)`,
             }}
           ></div>
 
@@ -69,6 +85,7 @@ const SidebarDrawer = ({ profile, open, onClose }) => {
           </p>
         </div>
 
+        {/* 🔹 Avatar Selector */}
         <div className="mt-6">
           <label className="text-sm text-gray-300">Select Avatar</label>
           <div className="flex space-x-2 mt-2 overflow-x-auto">
@@ -77,31 +94,38 @@ const SidebarDrawer = ({ profile, open, onClose }) => {
                 key={avatar}
                 onClick={() => handleAvatarSelect(avatar)}
                 className={`w-12 h-12 rounded-full border-2 ${
-                  profile.avatar === avatar ? 'border-lime-400' : 'border-white/10'
+                  profile.avatar === avatar
+                    ? "border-lime-400"
+                    : "border-white/10"
                 }`}
-                style={{ backgroundImage: `url(/avatars/${avatar}.png)`, backgroundSize: 'cover' }}
+                style={{
+                  backgroundImage: `url(/avatars/${avatar}.png)`,
+                  backgroundSize: "cover",
+                }}
               />
             ))}
           </div>
         </div>
 
+        {/* 🔹 Actions */}
         <div className="mt-8 flex-1 space-y-3">
-          <button className="w-full py-2 px-4 rounded-lg bg-teal-600 text-white hover:bg-teal-500">
+          <button className="w-full py-2 px-4 rounded-lg bg-teal-600 text-white hover:bg-teal-500 transition">
             ✅ Mark Today’s Ritual as Complete
           </button>
 
           <button
             onClick={handleThemeToggle}
-            className="w-full py-2 px-4 rounded-lg bg-blue-700 text-white hover:bg-blue-600"
+            className="w-full py-2 px-4 rounded-lg bg-blue-700 text-white hover:bg-blue-600 transition"
           >
             🌓 Toggle Theme
           </button>
         </div>
 
+        {/* 🔹 Footer */}
         <div className="mt-auto">
           <button
             onClick={handleLogout}
-            className="w-full py-2 px-4 rounded-lg bg-red-600 text-white hover:bg-red-500"
+            className="w-full py-2 px-4 rounded-lg bg-red-600 text-white hover:bg-red-500 transition"
           >
             🔓 Log Out
           </button>

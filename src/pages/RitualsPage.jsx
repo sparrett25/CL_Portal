@@ -1,18 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import PageFrame from "@/components/layout/PageFrame";
+import RitualBookGrid from "@/components/rituals/RitualBookGrid";
+import RitualModal from "@/components/rituals/RitualModal"; // ✅ Updated import
 
 export default function RitualsPage() {
+  const [activeRitual, setActiveRitual] = useState(null);
+
   return (
     <PageFrame
       title="🌀 Ritual Portal"
       subtitle="Enter sacred space. Begin your transformation."
     >
-      <div className="bg-zinc-900/60 border border-indigo-700/60 p-6 rounded-xl shadow-lg text-zinc-300 text-sm text-center">
-        Rituals are being prepared... soon you will shape your own ceremonies of
-        <span className="text-indigo-400"> light</span>, 
-        <span className="text-purple-300"> shadow</span>, and 
-        <span className="text-blue-300"> breath</span>.
-      </div>
+      <RitualBookGrid onSelect={(ritual) => setActiveRitual(ritual)} />
+
+      {/* ✅ Replaced inline layout with RitualModal */}
+      {activeRitual && (
+        <RitualModal ritual={activeRitual} onClose={() => setActiveRitual(null)} />
+      )}
     </PageFrame>
   );
 }

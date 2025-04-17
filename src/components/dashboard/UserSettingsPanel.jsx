@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabase"; // ✅ Unified source
 import { useUserSync } from "@/context/UserSyncContext";
 
 const energyOptions = ["Light", "Neutral", "Dark"];
@@ -11,7 +11,7 @@ const archetypeOptions = [
 const phaseOptions = ["Seeking", "Rising", "Integrating", "Evolving"];
 
 export default function UserSettingsPanel() {
-  const { userProfile, setUserProfile } = useUserSync() || {};
+  const { profile: userProfile, setProfile: setUserProfile } = useUserSync() || {};
   const [energy, setEnergy] = useState("");
   const [archetype, setArchetype] = useState("");
   const [phase, setPhase] = useState("");
@@ -26,14 +26,15 @@ export default function UserSettingsPanel() {
   }, [userProfile]);
 
   const handleSave = async () => {
-    setStatus("Saving...");
+    setStatus("Saving your resonance...");
+
     const {
       data: { user },
       error: authError
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      setStatus("Error: Not logged in.");
+      setStatus("⚠️ Error: You must be logged in.");
       return;
     }
 
@@ -45,30 +46,30 @@ export default function UserSettingsPanel() {
     };
 
     const { data, error } = await supabase
-      .from("users")
+      .from("profiles")
       .upsert(updates, { onConflict: "id" })
       .select()
       .single();
 
     if (error) {
-      setStatus("Save failed.");
+      setStatus("❌ Save failed.");
       console.error(error);
     } else {
-      setStatus("Profile saved!");
+      setStatus("✅ Profile saved and aligned.");
       setUserProfile(data); // Sync updated context
     }
   };
 
   return (
-    <div className="space-y-4 p-4 bg-zinc-900 rounded-xl max-w-xl mx-auto mt-8 shadow-xl">
-      <h2 className="text-xl font-semibold text-white">🧬 Update Your Signature Profile</h2>
+    <div className="space-y-4 p-6 bg-black/70 rounded-xl max-w-xl mx-auto mt-10 border border-indigo-500/20 shadow-2xl backdrop-blur-lg text-white font-inter">
+      <h2 className="text-2xl font-bold text-indigo-300 mb-4">🧬 Signature Profile</h2>
 
       <div>
         <label className="block text-sm text-zinc-300 mb-1">Energy Alignment</label>
         <select
           value={energy}
           onChange={(e) => setEnergy(e.target.value)}
-          className="w-full p-2 rounded bg-zinc-800 text-white border border-zinc-700"
+          className="w-full p-3 rounded bg-zinc-900 text-white border border-zinc-700 focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">Select Energy</option>
           {energyOptions.map((opt) => (
@@ -82,7 +83,7 @@ export default function UserSettingsPanel() {
         <select
           value={archetype}
           onChange={(e) => setArchetype(e.target.value)}
-          className="w-full p-2 rounded bg-zinc-800 text-white border border-zinc-700"
+          className="w-full p-3 rounded bg-zinc-900 text-white border border-zinc-700 focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">Select Archetype</option>
           {archetypeOptions.map((opt) => (
@@ -96,7 +97,7 @@ export default function UserSettingsPanel() {
         <select
           value={phase}
           onChange={(e) => setPhase(e.target.value)}
-          className="w-full p-2 rounded bg-zinc-800 text-white border border-zinc-700"
+          className="w-full p-3 rounded bg-zinc-900 text-white border border-zinc-700 focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">Select Phase</option>
           {phaseOptions.map((opt) => (
@@ -107,12 +108,16 @@ export default function UserSettingsPanel() {
 
       <button
         onClick={handleSave}
-        className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-white font-semibold"
+        className="mt-6 w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition"
       >
-        Save Profile
+        🔐 Save Profile
       </button>
 
-      {status && <div className="text-sm text-zinc-300 mt-2">{status}</div>}
+      {status && (
+        <div className="text-sm text-indigo-300 mt-3">
+          {status}
+        </div>
+      )}
     </div>
   );
 }

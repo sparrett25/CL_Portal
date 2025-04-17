@@ -1,8 +1,11 @@
 import { supabase } from "@/lib/supabase";
 
+/**
+ * Updates the user's phase and logs timestamp in the profiles table.
+ */
 export async function updatePhaseAndTimestamp(userId, newPhase) {
   const { error } = await supabase
-    .from("users")
+    .from("profiles") // ✅ Corrected from "users"
     .update({
       phase: newPhase,
       lastPhaseShiftDate: new Date().toISOString(),
@@ -12,6 +15,9 @@ export async function updatePhaseAndTimestamp(userId, newPhase) {
   if (error) console.error("❌ Failed to update phase:", error.message);
 }
 
+/**
+ * Logs a phase shift event into the evolution_log.
+ */
 export async function logPhaseShiftEvent(userId, fromPhase, toPhase) {
   const { error } = await supabase.from("evolution_log").insert([
     {
@@ -25,6 +31,9 @@ export async function logPhaseShiftEvent(userId, fromPhase, toPhase) {
   if (error) console.error("❌ Failed to log phase event:", error.message);
 }
 
+/**
+ * Retrieves a user's full evolution history.
+ */
 export async function getUserEvolutionHistory(userId) {
   const { data, error } = await supabase
     .from("evolution_log")
